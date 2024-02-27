@@ -1,0 +1,228 @@
+
+@media only screen and (max-width: 767px){
+    .container_home{
+        display: flex;
+        flex-direction: column; /*everything within container is vertical stacked*/
+        margin: auto; /*center container in center of body*/
+        margin-top: 5%;
+        max-width: 95%;
+        background: #ffffff;
+        padding-bottom: 5%;
+    }
+
+    .inputAmount{
+        display: flex;
+        flex-direction: column;
+        margin: auto;
+        margin-top: 10%;
+        width: 90%;
+        font-weight: 10px;
+    }
+
+    .foods_in_menu{
+        width: 95%;
+        display: flex;
+        align-items: center; /* Center items vertically within each food item */
+        padding: 5px; /* Optional padding for better visual appearance */
+        background-color: #40b346;
+        color: #fff;
+        margin: auto;
+        margin-top: 5px;
+        font-weight: 700;
+        font-size: 13px;
+        border-radius: 6px;
+    }
+
+    .body{
+        background-color: #eee; 
+        color: #797979; 
+    }
+}
+
+@media only screen and (min-width: 767px){
+    .container_home{
+        display: flex;
+        flex-direction: column; /*everything within container is vertical stacked*/
+        margin: auto; /*center container in center of body*/
+        margin-top: 5%;
+        max-width: 60%;
+        background: #ffffff;
+        padding-bottom: 5%;
+    }
+
+    .inputAmount{
+        display: flex;
+        flex-direction: column;
+        margin: auto;
+        margin-top: 10%;
+        width: 60%;
+    }
+
+    .foods_in_menu{
+        width: 95%;
+        display: flex;
+        align-items: center; /* Center items vertically within each food item */
+        padding-left: 5px;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        background-color: #40b346;
+        color: #fff;
+        margin: auto;
+        margin-top: 5px;
+        font-weight: 700;
+        border-radius: 6px;
+    }
+
+    .body{
+        margin-right: 10px;
+        background-color: #eee; 
+        color: #797979; 
+    }
+}
+
+.focused_window{
+    height: 50vh;
+    display: flex;
+    flex-direction: column; 
+    margin: auto; 
+}
+
+.focused_circle{
+    display: flex;
+    flex-direction: column; 
+    margin: auto; 
+    width: 100%;
+    height: 100%;
+}
+
+.unfocused_window{
+    display: flex;
+    flex-direction: row;
+    margin: auto;
+    align-items: center;
+    height: 25vh;
+}
+
+.unfocused_square{
+    width: 33%;
+    height: 100%;
+    align-items: center;
+    margin: auto;
+}
+
+.text_in_circle{
+    font-size: 50px;
+}
+
+.text_in_circle_unfocused{
+    font-size: 25px;
+}
+
+.vertical_menu {
+    width: 99%;
+    margin: auto; 
+    max-height: 500px;
+}
+
+.scrollable{
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 400px;
+    width: 100%;
+}
+
+.foods_in_menu .name{
+    flex: 0 0 30%;
+}
+
+.foods_in_menu .macro{
+    flex: 0 0 14%;
+    display: flex;
+    justify-content: center;
+}
+
+.foods_in_menu .selected{
+    flex: 0 0 30%;
+}
+
+.hoverable:hover {
+    transform: scale(1.03);
+    background-color: #ccc; /* Dark grey background on mouse-over */
+}
+
+.text{
+    font-size: 25px;
+    font-weight: 700;
+}
+
+.button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 220px;
+    height: 59px;
+    color: #fff;
+    background: #40b346;
+    border-radius: 50px;
+    font-size: 19px;
+    font-weight: 700;
+    cursor: pointer;
+    margin: 3%;
+    transition: transform 0.3s
+}
+
+.horizontal_buttons{
+    display: flex;
+    flex-direction: row;
+    margin: auto;
+    align-items: center;
+    width: 100%;
+}
+
+.beside{
+    width: 50%;
+}
+
+.delete{
+    background: #eb0606;
+}
+
+.button:hover{
+    transform: scale(1.15);
+    transition: transform 0.3s
+}
+
+.textbox input{
+    height: 80px;
+    width: 100%;
+    background: transparent;
+    border: none; /*this line and the next one hide the input fields*/
+    outline: none;
+    color: #797979; /*text color*/
+    font-size: 25px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.textbox{
+    display: flex;
+    align-items: center;
+    margin: auto;
+    width: 100%;
+    height: 80px;
+    background: #eaeaea;
+    border-radius: 6px;
+}
+
+.foods_in_menu input{
+    width: 100%;
+    background: transparent;
+    border: none; /*this line and the next one hide the input fields*/
+    outline: none;
+    color: #797979; /*text color*/
+    font-weight: 800;
+}
+
+.macro input{
+    text-align: center;
+}
