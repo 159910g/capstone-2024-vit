@@ -37,6 +37,13 @@
         background-color: #eee; 
         color: #797979; 
     }
+
+    .scrollable{
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 370px;
+        width: 100%;
+    }
 }
 
 @media only screen and (min-width: 767px){
@@ -77,6 +84,13 @@
         margin-right: 10px;
         background-color: #eee; 
         color: #797979; 
+    }
+
+    .scrollable{
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 400px;
+        width: 100%;
     }
 }
 
@@ -122,13 +136,6 @@
     width: 99%;
     margin: auto; 
     max-height: 500px;
-}
-
-.scrollable{
-    overflow-y: auto;
-    overflow-x: hidden;
-    max-height: 400px;
-    width: 100%;
 }
 
 .foods_in_menu .name{

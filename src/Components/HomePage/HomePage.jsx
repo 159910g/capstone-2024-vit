@@ -6,7 +6,7 @@ import { Chart as ChartJS } from "chart.js/auto";
 import { Bar } from "react-chartjs-2";
 //import Chart  from './Chart.jsx';
 import { useNavigate } from 'react-router-dom';
-import { GetUserGoals, GetUserTrackedFood, GetFoodNames, AddToTrackedFood, UploadCustomFood, GetUserGenFoodNames, EditCustomFood, CheckDate, DeleteCustomFood, GetUserHistory, AddRecipe } from './DatabaseCalls.jsx';
+import { GetUserGoals, GetUserTrackedFood, GetFoodNames, AddToTrackedFood, UploadCustomFood, GetUserGenFoodNames, EditCustomFood, CheckDate, DeleteCustomFood, GetUserHistory, AddRecipe, GetUserGenRecipes, GetUserRecipeIngredients } from './DatabaseCalls.jsx';
 
 const HomePage = () => {
     const nav = useNavigate();
@@ -51,6 +51,7 @@ const HomePage = () => {
     const[editCustomFoods, setEditCustomFoods] = useState(false);
     const[viewHistory, setViewHistory] = useState(false);
     const[addRecipe, setAddRecipe] = useState(false);
+    const[editRecipe, setEditRecipe] = useState(false);
     const[addFoodtoRecipe, setAddFoodtoRecipe] = useState(false);
     const[enteringAmountForRecipe, setEnteringAmountForRecipe] = useState(false);
 
@@ -78,6 +79,14 @@ const HomePage = () => {
     const[foodFatUG, setFoodFatUG] = useState([]);
     const[foodGramsUG, setFoodGramsUG] = useState([]);
 
+    //array of recipes
+    const[foodNamesUGR, setFoodNamesUGR] = useState([]);
+    const[foodProteinUGR, setFoodProteinUGR] = useState([]);
+    const[foodCaloriesUGR, setFoodCaloriesUGR] = useState([]);
+    const[foodCarbsUGR, setFoodCarbsUGR] = useState([]);
+    const[foodFatUGR, setFoodFatUGR] = useState([]);
+    const[foodGramsUGR, setFoodGramsUGR] = useState([]);
+
     //storing the history user's tracked macros
     const[proteinHistory, setProteinHistory] = useState([]);
     const[caloriesHistory, setCaloriesHistory] = useState([]);
@@ -98,6 +107,9 @@ const HomePage = () => {
     //used when user inputting how much food was eaten + keeping track of what food was selected
     const[grams, setGrams] = useState(0);
     const[currentMacros, setCurrentMacros] = useState([]);
+
+    const[nextIndex, setNextIndex] = useState(0);
+    const[ingredientsFromDB, setIngredientsFromDB] = useState([]);
 
     const[selectedFoodName, setSelectedFoodName] = useState("");
 
@@ -181,13 +193,14 @@ const HomePage = () => {
     
     window.addEventListener("resize", UpdateCircles);
 
-    function resetCustomValues (){
+    function resetCustomValues() {
         setCustomName("");
         setCustomProtein(0);
         setCustomCalories(0);
         setCustomCarbs(0);
         setCustomFat(0);
         setCustomGrams(0);
+        setNextIndex(0);
 
         setFoodsForRecipe([]);
         setgramsForRecipe([]);
@@ -215,7 +228,8 @@ const HomePage = () => {
         });
     }
 
-    function FoodSelectedForRecipe(){
+    function RecipeIngredientsLogic()
+    {
         let tempArray = [];
         tempArray = foodsForRecipe
         tempArray.push(selectedFoodName)
@@ -234,6 +248,7 @@ const HomePage = () => {
         value = parseInt(customCalories, 10) + division;
         setCustomCalories(value);
 
+        console.log(value)
         tempArray = recipefoodCalories
         tempArray.push(division)
         setRecipeFoodCalories(tempArray);
@@ -262,6 +277,10 @@ const HomePage = () => {
         tempArray.push(division)
         setRecipeFoodFat(tempArray);
         /*******************************************************/
+    }
+
+    function FoodSelectedForRecipe(){
+        RecipeIngredientsLogic();
         setEnteringAmountForRecipe(false);
         setAddRecipe(true);
     }
@@ -305,6 +324,87 @@ const HomePage = () => {
         setEditCustomFoods(true);
     }
 
+    function EditRecipe(foodname){
+        resetCustomValues();
+        //womp
+        GetUserRecipeIngredients(foodname).then((foods) => {
+            const combinedData = foods.tempFoodCaloriesList.map((calories, index) => ({
+                calories,
+                protein: foods.tempFoodProteinList[index],
+                carbs: foods.tempFoodCarbsList[index],
+                fat: foods.tempFoodFatList[index],
+                grams: foods.tempFoodGramsList[index],
+                name: foods.tempFoodNamesList[index]
+            }));
+
+            console.log(combinedData);
+
+            setIngredientsFromDB(combinedData);
+        });
+
+        setMyFoods(false);
+        setEditRecipe(true);
+    }
+
+    function DataFromRecipe(foods, index)
+    {
+        console.log("datafromrecipe");
+        let tempArray = [];
+        tempArray = foodsForRecipe
+        tempArray.push(foods[index].name)
+        setFoodsForRecipe(tempArray);
+        console.log(foodsForRecipe);
+        /*******************************************************/
+        tempArray = gramsForRecipe
+        tempArray.push(foods[index].grams);
+        setgramsForRecipe(tempArray);
+        console.log(gramsForRecipe);
+
+        let value = parseInt(customGrams, 10) + parseInt(foods[index].grams, 10);
+        setCustomGrams(value);
+        /*******************************************************/
+        let division =  parseInt(foods[index].calories  * (foods[index].grams/foods[index].grams), 10)
+        value = parseInt(customCalories, 10) + division; 
+        setCustomCalories(value); //this is the value listed at the top, the recipes total calories
+
+        tempArray = recipefoodCalories
+        tempArray.push(division)
+        setRecipeFoodCalories(tempArray);
+        /*******************************************************/
+        division = parseInt(foods[index].protein  * (foods[index].grams/foods[index].grams), 10)
+        value = parseInt(customProtein, 10) + division;
+        setCustomProtein(value);
+
+        tempArray = recipefoodProtein
+        tempArray.push(division)
+        setRecipeFoodProtein(tempArray);
+        /*******************************************************/
+        division = parseInt(foods[index].carbs  * (foods[index].grams/foods[index].grams), 10)
+        value = parseInt(customCarbs, 10) + division;
+        setCustomCarbs(value);
+
+        tempArray = recipefoodCarbs
+        tempArray.push(division)
+        setRecipeFoodCarbs(tempArray);
+        /*******************************************************/
+        division = parseInt(foods[index].fat  * (foods[index].grams/foods[index].grams), 10)
+        value = parseInt(customFat, 10) + division;
+        setCustomFat(value);
+
+        tempArray = recipefoodFat
+        tempArray.push(division)
+        setRecipeFoodFat(tempArray);
+        /*******************************************************/
+        console.log(index +":"+ingredientsFromDB.length)
+        setNextIndex(index+1);
+    }
+
+    useEffect(() =>{
+        console.log("heheh" + ingredientsFromDB.length);
+        if(ingredientsFromDB.length > nextIndex) 
+            DataFromRecipe(ingredientsFromDB, nextIndex)
+    }, [nextIndex, ingredientsFromDB])
+
     function AmountToViewing() {
         setViewFoods(true);
         setEnteringAmount(false);
@@ -339,6 +439,7 @@ const HomePage = () => {
     function AddRecipeToAddFoodToRecipe(value)
     {
         setAddFoodtoRecipe(value);
+        setEditRecipe(!value);
         setAddRecipe(!value);
     }
 
@@ -388,6 +489,15 @@ const HomePage = () => {
             setFoodFatUG(foods.tempFoodFatList);
             setFoodGramsUG(foods.tempFoodGramsList);
         })
+
+        GetUserGenRecipes().then((foods) => {
+            setFoodNamesUGR(foods.tempFoodNamesList);
+            setFoodCaloriesUGR(foods.tempFoodCaloriesList);
+            setFoodProteinUGR(foods.tempFoodProteinList);
+            setFoodCarbsUGR(foods.tempFoodCarbsList);
+            setFoodFatUGR(foods.tempFoodFatList);
+            setFoodGramsUGR(foods.tempFoodGramsList);
+        })
     }
 
 
@@ -407,6 +517,7 @@ const HomePage = () => {
             totalGrams += parseInt(gram,10);
         }
         AddRecipe(customName, totalGrams, foodsForRecipe);
+        UpdateFoodLists();
         setAddRecipe(false);
         setViewHome(true);
     }
@@ -451,6 +562,13 @@ const HomePage = () => {
     {
         setMyFoods(!value);
         setAddRecipe(value);
+        resetCustomValues();
+    }
+
+    function myFoodToEditRecipe(value)
+    {
+        setMyFoods(!value);
+        setEditRecipe(value);
         resetCustomValues();
     }
 
@@ -734,33 +852,60 @@ const HomePage = () => {
                 </div>
             }{/* USER LOOKING AT ALL THEIR FOODS IN DB WITH OPTION TO DELETE, EDIT OR ADD*/}
             {myFoods===false?<div></div>:
-                <div className="vertical_menu">
-                    <div className="horizontal_buttons">
-                        <div className="button" onClick={()=>{myFoodToViewFood(true);}}>Back</div>
-                        <div className="button" style={{fontSize:"17px"}} onClick={()=>{MyFoodToAddCustomFood(true);}}>Add Food</div>
-                        <div className="button" style={{fontSize:"17px"}} onClick={()=>{myFoodsToRecipe(true);}}>Add Recipe</div>
-                    </div>
-                    <div className="foods_in_menu">
-                        <div className="name">Name</div>
-                        <div className="macro">Grams Per Serving</div>
-                        <div className="macro">Calories</div>
-                        <div className="macro">Protein</div>
-                        <div className="macro">Carbs</div>
-                        <div className="macro">Fat</div>
-                    </div>
-                    <div className="scrollable">
-                        {foodNamesUG.map((foodname, index) => ( 
-                            <div key={index} onClick={()=>{EditFood(foodname, index)}} className="foods_in_menu body hoverable">
-                                <div className={index === 0 ? 'name' : 'name'}>
-                                    {foodname}
+                <div>
+                    <div className="vertical_menu">
+                        <div className="horizontal_buttons">
+                            <div className="button" onClick={()=>{myFoodToViewFood(true);}}>Back</div>
+                            <div className="button" style={{fontSize:"17px"}} onClick={()=>{MyFoodToAddCustomFood(true);}}>Add Food</div>
+                            <div className="button" style={{fontSize:"17px"}} onClick={()=>{myFoodsToRecipe(true);}}>Add Recipe</div>
+                        </div>
+                        <div className="foods_in_menu">
+                            <div className="name">Food Name</div>
+                            <div className="macro">Grams Per Serving</div>
+                            <div className="macro">Calories</div>
+                            <div className="macro">Protein</div>
+                            <div className="macro">Carbs</div>
+                            <div className="macro">Fat</div>
+                        </div>
+                        <div className="scrollable">
+                            {foodNamesUG.map((foodname, index) => ( 
+                                <div key={index} onClick={()=>{EditFood(foodname, index)}} className="foods_in_menu body hoverable">
+                                    <div className={index === 0 ? 'name' : 'name'}>
+                                        {foodname}
+                                    </div>
+                                    <div className="macro">{foodGramsUG[index]}</div>
+                                    <div className="macro">{foodCaloriesUG[index]}</div>
+                                    <div className="macro">{foodProteinUG[index]}</div>
+                                    <div className="macro">{foodCarbsUG[index]}</div>
+                                    <div className="macro">{foodFatUG[index]}</div>
                                 </div>
-                                <div className="macro">{foodGramsUG[index]}</div>
-                                <div className="macro">{foodCaloriesUG[index]}</div>
-                                <div className="macro">{foodProteinUG[index]}</div>
-                                <div className="macro">{foodCarbsUG[index]}</div>
-                                <div className="macro">{foodFatUG[index]}</div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
+                    </div>
+                    <div style={{paddingBottom: "8%"}}></div>
+                    <div className="vertical_menu">
+                        <div className="foods_in_menu">
+                            <div className="name">Recipe Name</div>
+                            <div className="macro">Grams Per Serving</div>
+                            <div className="macro">Calories</div>
+                            <div className="macro">Protein</div>
+                            <div className="macro">Carbs</div>
+                            <div className="macro">Fat</div>
+                        </div>
+                        <div className="scrollable">
+                            {foodNamesUGR.map((foodname, index) => ( 
+                                <div key={index} onClick={()=>{EditRecipe(foodname, index)}} className="foods_in_menu body hoverable">
+                                    <div className={index === 0 ? 'name' : 'name'}>
+                                        {foodname}
+                                    </div>
+                                    <div className="macro">{foodGramsUGR[index]}</div>
+                                    <div className="macro">{foodCaloriesUGR[index]}</div>
+                                    <div className="macro">{foodProteinUGR[index]}</div>
+                                    <div className="macro">{foodCarbsUGR[index]}</div>
+                                    <div className="macro">{foodFatUGR[index]}</div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             }
@@ -835,7 +980,7 @@ const HomePage = () => {
                 </div>
             }
             {/*USER IS ADDING A RECIPE*/}
-            {addRecipe===false?<div></div>:
+            {addRecipe===false && editRecipe===false?<div></div>:
             <div className="inputAmount">
                 <div className="foods_in_menu">
                     <div className="name">Recipe Name</div>
@@ -893,11 +1038,19 @@ const HomePage = () => {
                     ))}
                 </div>
 
+                {editRecipe===false?
                 <div className="horizontal_buttons">
                     <div className="button beside" onClick={()=>AddRecipeToHome()}>Save</div>
                     <div className="button beside" onClick={()=>AddRecipeToAddFoodToRecipe(true)}>Add Food</div>
                     <div className="button beside" onClick={()=>myFoodsToRecipe(false)}>Back</div>
+                </div>:
+                <div className="horizontal_buttons">
+                    <div className="button beside" onClick={()=>AddRecipeToHome()}>Save</div>
+                    <div className="button beside" onClick={()=>AddRecipeToAddFoodToRecipe(true)}>Add Food</div>
+                    <div className="button beside" onClick={()=>myFoodToEditRecipe(false)}>Back</div>
+                    <div className="button beside delete">Delete</div>
                 </div>
+                }
             </div>
             }
         </div>

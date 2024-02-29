@@ -174,6 +174,85 @@ export function GetUserGenFoodNames () {
     });
 }
 
+//gets all the user generated food
+export function GetUserGenRecipes () {
+    let user_id = sessionStorage.getItem('loggedInUser');
+
+    return new Promise((resolve, reject) =>{
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'https://capstone2024.com/homePage.php?action=GetUserRecipes');
+        xhr.responseType = 'text';
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.send('useridJSON=' + encodeURIComponent(JSON.stringify(user_id)));
+        xhr.addEventListener('load', function() {
+            if (xhr.status === 200) {
+                //console.log(xhr.responseText);
+                let responseText = JSON.parse(xhr.responseText);
+
+                const tempFoodNamesList = [];
+                const tempFoodCaloriesList = [];
+                const tempFoodProteinList = [];
+                const tempFoodCarbsList = [];
+                const tempFoodFatList = [];
+                const tempFoodGramsList = [];
+
+                responseText.forEach(row => {
+                    tempFoodNamesList.push(row.name);
+                    tempFoodCaloriesList.push(row.calories);
+                    tempFoodProteinList.push(row.protein);
+                    tempFoodCarbsList.push(row.carbs);
+                    tempFoodFatList.push(row.fat)
+                    tempFoodGramsList.push(row.grams)
+                });
+
+                resolve({tempFoodNamesList, tempFoodCaloriesList, tempFoodProteinList, tempFoodCarbsList, tempFoodFatList, tempFoodGramsList});
+            } else {
+                reject('Error: ' + xhr.status); // log any errors to the console
+            }
+        });
+    });
+}
+
+export function GetUserRecipeIngredients(recipeName) {
+    let user_id = sessionStorage.getItem('loggedInUser');
+    console.log(recipeName);
+    const data = {user_id, recipeName};
+
+    return new Promise((resolve, reject) =>{
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'https://capstone2024.com/homePage.php?action=GetRecipeIngredients');
+        xhr.responseType = 'text';
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.send('sentData=' + encodeURIComponent(JSON.stringify(data)));
+        xhr.addEventListener('load', function() {
+            if (xhr.status === 200) {
+                console.log(xhr.responseText);
+                let responseText = JSON.parse(xhr.responseText);
+
+                const tempFoodNamesList = [];
+                const tempFoodCaloriesList = [];
+                const tempFoodProteinList = [];
+                const tempFoodCarbsList = [];
+                const tempFoodFatList = [];
+                const tempFoodGramsList = [];
+
+                responseText.forEach(row => {
+                    tempFoodNamesList.push(row.name);
+                    tempFoodCaloriesList.push(row.calories);
+                    tempFoodProteinList.push(row.protein);
+                    tempFoodCarbsList.push(row.carbs);
+                    tempFoodFatList.push(row.fat)
+                    tempFoodGramsList.push(row.grams)
+                });
+
+                resolve({tempFoodNamesList, tempFoodCaloriesList, tempFoodProteinList, tempFoodCarbsList, tempFoodFatList, tempFoodGramsList});
+            } else {
+                reject('Error: ' + xhr.status); // log any errors to the console
+            }
+        });
+    });
+}
+
 //takes the  selected food and adds it and the amount eaten to what the user has eaten
 export function AddToTrackedFood (foodName, grams) {
         //this will take in an amount as well to send to db
