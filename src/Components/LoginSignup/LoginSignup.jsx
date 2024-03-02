@@ -82,10 +82,11 @@ const LoginSignup = () => {
             xhr.addEventListener('load', function() {
                 if (xhr.status === 200) {
                     // Handle the response from the server
+                    //console.log(xhr.responseText);
                     var responseText = JSON.parse(xhr.responseText);
                     sessionStorage.setItem('loggedInUser', responseText[0].user_id)
 
-                    console.log(sessionStorage.getItem('loggedInUser')); // log the response to the console
+                    //console.log(sessionStorage.getItem('loggedInUser')); // log the response to the console
                 
                     if(sessionStorage.getItem('loggedInUser') != null)
                     {

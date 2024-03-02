@@ -48,7 +48,7 @@ export function GetUserTrackedFood () {
         xhr.addEventListener('load', function() {
             if (xhr.status === 200) {
                 // Handle the response from the server
-                console.log(xhr.responseText);
+                //console.log(xhr.responseText);
                 let responseText = JSON.parse(xhr.responseText);
 
                 let currentCalories = 0;
@@ -72,8 +72,8 @@ export function GetUserTrackedFood () {
                         currentCarbs += Math.floor(parseInt(row.carbs, 10) * amountEaten);
                         currentFat += Math.floor(parseInt(row.fat, 10) * amountEaten);
 
-                        console.log("current row= "+row.calories);
-                        console.log("current calories= "+currentCalories);
+                        //console.log("current row= "+row.calories);
+                        //console.log("current calories= "+currentCalories);
                     }
                     else
                     {
@@ -235,17 +235,19 @@ export function GetUserRecipeIngredients(recipeName) {
                 const tempFoodCarbsList = [];
                 const tempFoodFatList = [];
                 const tempFoodGramsList = [];
+                const tempFoodGramsUsedList = [];
 
                 responseText.forEach(row => {
                     tempFoodNamesList.push(row.name);
                     tempFoodCaloriesList.push(row.calories);
                     tempFoodProteinList.push(row.protein);
                     tempFoodCarbsList.push(row.carbs);
-                    tempFoodFatList.push(row.fat)
-                    tempFoodGramsList.push(row.grams)
+                    tempFoodFatList.push(row.fat);
+                    tempFoodGramsList.push(row.grams);
+                    tempFoodGramsUsedList.push(row.gramsPerIngredient)
                 });
 
-                resolve({tempFoodNamesList, tempFoodCaloriesList, tempFoodProteinList, tempFoodCarbsList, tempFoodFatList, tempFoodGramsList});
+                resolve({tempFoodNamesList, tempFoodCaloriesList, tempFoodProteinList, tempFoodCarbsList, tempFoodFatList, tempFoodGramsList, tempFoodGramsUsedList});
             } else {
                 reject('Error: ' + xhr.status); // log any errors to the console
             }
@@ -404,6 +406,7 @@ export function GetUserDetails(){
         xhr.send('sentData=' + encodeURIComponent(JSON.stringify(user_id)));
         xhr.addEventListener('load', function() {
             if (xhr.status === 200) {
+                console.log(xhr.responseText);
                 let responseText = JSON.parse(xhr.responseText);
                 console.log(responseText);
 
@@ -443,9 +446,9 @@ export function EditUserDetails(weight, height, age, name, email, password, gend
     });
 }
 
-export function AddRecipe(recipeName, grams, foodnames){
+export function AddRecipe(recipeName, grams, foodnames, gramsPerIngredient){
     let user_id = sessionStorage.getItem('loggedInUser');
-    const data = {user_id, recipeName, grams, foodnames}
+    const data = {user_id, recipeName, grams, foodnames, gramsPerIngredient}
     return new Promise((resolve, reject) =>{
         var xhr = new XMLHttpRequest();
         xhr.open('POST', 'https://capstone2024.com/homePage.php?action=AddRecipe');

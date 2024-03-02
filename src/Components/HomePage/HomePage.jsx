@@ -1,7 +1,8 @@
 //import axios from "axios"
 import {useEffect, useRef, useState} from "react";
 import './HomePage.css';
-import { updateCircle } from './Circle.jsx';
+import { updateCircle, MacroCircle, MicroCircle } from './Circle.jsx';
+import { GeneralHeader, RecipeHeader, IngredientsHeader} from "./DataDisaplayer.jsx";
 import { Chart as ChartJS } from "chart.js/auto";
 import { Bar } from "react-chartjs-2";
 //import Chart  from './Chart.jsx';
@@ -31,16 +32,10 @@ const HomePage = () => {
     const [circPercentageCarbs, setCircPercentageCarbs] = useState(null);
 
     //macro goals for user
-    const[calorieGoal, setCalorieGoal] = useState(1);
-    const[proteinGoal, setProteinGoal] = useState(1);
-    const[carbGoal, setCarbGoal] = useState(1);
-    const[fatGoal, setFatGoal] = useState(1);
+    const[macroGoals, setMacroGoals] = useState(1);
 
     //current macro data for  user
-    const[calories, setCalories] = useState(0);
-    const[protein, setProtein] = useState(0);
-    const[carbs, setCarbs] = useState(0);
-    const[fat, setFat] = useState(0);
+    const[currentTrackedMacros, setCurrentTrackedMacros] = useState(0);
 
     //states for menu selection
     const[viewFoods, setViewFoods] = useState(false);
@@ -56,36 +51,38 @@ const HomePage = () => {
     const[enteringAmountForRecipe, setEnteringAmountForRecipe] = useState(false);
 
     //arrays of food information for displaying the database
-    const[foodNames, setFoodNames] = useState([]);
-    const[foodProtein, setFoodProtein] = useState([]);
-    const[foodCalories, setFoodCalories] = useState([]);
-    const[foodCarbs, setFoodCarbs] = useState([]);
-    const[foodFat, setFoodFat] = useState([]);
-    const[foodGrams, setFoodGrams] = useState([]);
-
+    const[foodDatabase, setFoodDatabase] = useState([]);
+    
     //arrays of food information for displaying the recipe
-    const[foodsForRecipe, setFoodsForRecipe] = useState([]);
-    const[gramsForRecipe, setgramsForRecipe] = useState([]);
-    const[recipefoodProtein, setRecipeFoodProtein] = useState([]);
-    const[recipefoodCalories, setRecipeFoodCalories] = useState([]);
-    const[recipefoodCarbs, setRecipeFoodCarbs] = useState([]);
-    const[recipefoodFat, setRecipeFoodFat] = useState([]);
+    const[recipeData, setRecipeData] = useState([{
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        grams: 0,
+        name: "",
+        gramsUsed: 0
+    }]);
 
     //arrays of food only from user generatedFood
-    const[foodNamesUG, setFoodNamesUG] = useState([]);
-    const[foodProteinUG, setFoodProteinUG] = useState([]);
-    const[foodCaloriesUG, setFoodCaloriesUG] = useState([]);
-    const[foodCarbsUG, setFoodCarbsUG] = useState([]);
-    const[foodFatUG, setFoodFatUG] = useState([]);
-    const[foodGramsUG, setFoodGramsUG] = useState([]);
+    const[UGFoodDatabase, setUGFoodDatabase] = useState([{
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        grams: 0,
+        name: "",
+    }])
 
     //array of recipes
-    const[foodNamesUGR, setFoodNamesUGR] = useState([]);
-    const[foodProteinUGR, setFoodProteinUGR] = useState([]);
-    const[foodCaloriesUGR, setFoodCaloriesUGR] = useState([]);
-    const[foodCarbsUGR, setFoodCarbsUGR] = useState([]);
-    const[foodFatUGR, setFoodFatUGR] = useState([]);
-    const[foodGramsUGR, setFoodGramsUGR] = useState([]);
+    const[UGRFoodDatabase, setUGRFoodDatabase] = useState([{
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        grams: 0,
+        name: "",
+    }])
 
     //storing the history user's tracked macros
     const[proteinHistory, setProteinHistory] = useState([]);
@@ -97,19 +94,24 @@ const HomePage = () => {
     const[yearHistory, setYearHistory] = useState([]);
 
     //used for storing/sending the custom food data that user enters to database
-    const[customName, setCustomName] = useState("");
-    const[customProtein, setCustomProtein] = useState(0);
-    const[customCalories, setCustomCalories] = useState(0);
-    const[customCarbs, setCustomCarbs] = useState(0);
-    const[customFat, setCustomFat] = useState(0);
-    const[customGrams, setCustomGrams] = useState(0);
+    const[customUserData, setCustomUserData] = useState({
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        name: "",
+        grams: 0});
 
     //used when user inputting how much food was eaten + keeping track of what food was selected
     const[grams, setGrams] = useState(0);
-    const[currentMacros, setCurrentMacros] = useState([]);
+    const[currentMacros, setCurrentMacros] = useState([{
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        grams: 0
+    }]);
 
-    const[nextIndex, setNextIndex] = useState(0);
-    const[ingredientsFromDB, setIngredientsFromDB] = useState([]);
 
     const[selectedFoodName, setSelectedFoodName] = useState("");
 
@@ -120,22 +122,34 @@ const HomePage = () => {
         let year = today.getFullYear();
         let day = today.getDate();
 
+        let combinedData = {
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0,
+            name: "",
+            grams: 0
+        }
+
+        setCustomUserData(combinedData)
+
         CheckDate(day, month, year).then(() => {
             UpdateFoodLists();
 
             GetUserGoals().then((goals) => {
-
-                setCalorieGoal(goals.calorieGoal);
-                setProteinGoal(goals.proteinGoal);
-                setCarbGoal(goals.carbGoal);
-                setFatGoal(goals.fatGoal);
+                //womp2
+                setMacroGoals(goals);
             });
             GetUserTrackedFood().then((macros) => {
-                setCalories(macros.currentCalories);
-                setProtein(macros.currentProtein);
-                setCarbs(macros.currentCarbs);
-                setFat(macros.currentFat);
-            });
+                const renameData = {
+                    calories: macros.currentCalories,
+                    protein: macros.currentProtein,
+                    carbs: macros.currentCarbs,
+                    fat: macros.currentFat
+                }
+                console.log(renameData);
+                setCurrentTrackedMacros(renameData);
+                });
             });
     }, []);
 
@@ -143,11 +157,11 @@ const HomePage = () => {
         //console.log("Updating Circles...");
         if(viewHome)
             UpdateCircles();
-    }, [calories, viewHome]); //<- causes this useEffect to get run whenever either of these variables in updated
+    }, [currentTrackedMacros, viewHome]); //<- causes this useEffect to get run whenever either of these variables in updated
         
     const updateCalorieCircle = (svgCanvas) => {
         //console.log("updating calorie circle")
-        const {newRad, newCirc, newCircPercent} = updateCircle(svgCanvas, 0.85, calories, calorieGoal);//responseText[0].calorie_goal))
+        const {newRad, newCirc, newCircPercent} = updateCircle(svgCanvas, 0.85, currentTrackedMacros.calories, macroGoals.calorieGoal);//responseText[0].calorie_goal))
         
         //set all those values to "global" variables
         SetRadius(newRad);
@@ -158,7 +172,7 @@ const HomePage = () => {
     const updateProteinCircle = (svgCanvas) =>{
         //all the unfocused circles are the same size as this one so it sets the radius and circumferences they all use
         //but their own functions return the percentage of the circle that is filled by them
-        const {newRad, newCirc, newCircPercent} = updateCircle(svgCanvas, 0.85, protein, proteinGoal)
+        const {newRad, newCirc, newCircPercent} = updateCircle(svgCanvas, 0.85, currentTrackedMacros.protein, macroGoals.proteinGoal)
 
         //set all those values to "global" variables
         SetRadiusUnfocused(newRad);
@@ -167,20 +181,21 @@ const HomePage = () => {
     };
 
     const updateFatCircle = (svgCanvas) =>{
-        const {newCircPercent} = updateCircle(svgCanvas, 0.85, fat, fatGoal)
+        const {newCircPercent} = updateCircle(svgCanvas, 0.85, currentTrackedMacros.fat, macroGoals.fatGoal)
 
         //set all those values to "global" variables
         setCircPercentageFat(newCircPercent);
     };
 
     const updateCarbCircle = (svgCanvas) =>{
-        const {newCircPercent} = updateCircle(svgCanvas, 0.85, carbs, carbGoal)
+        const {newCircPercent} = updateCircle(svgCanvas, 0.85, currentTrackedMacros.carbs, macroGoals.carbGoal)
 
         //set all those values to "global" variables
         setCircPercentageCarbs(newCircPercent);
     };
 
     const UpdateCircles = () =>{
+        console.log(currentTrackedMacros.currentCalories)
         if(calorieCanvas.current)
             updateCalorieCircle(calorieCanvas.current);
         if(proteinCanvas.current)
@@ -194,20 +209,19 @@ const HomePage = () => {
     window.addEventListener("resize", UpdateCircles);
 
     function resetCustomValues() {
-        setCustomName("");
-        setCustomProtein(0);
-        setCustomCalories(0);
-        setCustomCarbs(0);
-        setCustomFat(0);
-        setCustomGrams(0);
-        setNextIndex(0);
+        
+        let combinedData = {
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0,
+            name: "",
+            grams: 0
+        }
 
-        setFoodsForRecipe([]);
-        setgramsForRecipe([]);
-        setRecipeFoodProtein([]);
-        setRecipeFoodCalories([]);
-        setRecipeFoodCarbs([]);
-        setRecipeFoodFat([]);
+        setCustomUserData(combinedData)
+
+        setRecipeData([]);
     }
 
     function FoodSelected() { 
@@ -215,12 +229,15 @@ const HomePage = () => {
         AddToTrackedFood(selectedFoodName, grams).then(() => {
             //once added get the tracked food information
             GetUserTrackedFood().then((macros) => {
-                //then updates all the macro numbers and put user back to home screen
-                setCalories(macros.currentCalories);
-                setProtein(macros.currentProtein);
-                setCarbs(macros.currentCarbs);
-                setFat(macros.currentFat);
-
+                //this  data isnt doing anything but it ensures updatecircles gets called at the right time
+                const renameData = {
+                    calories: macros.currentCalories,
+                    protein: macros.currentProtein,
+                    carbs: macros.currentCarbs,
+                    fat: macros.currentFat
+                }
+                console.log(renameData);
+                setCurrentTrackedMacros(renameData);
                 setViewFoods(false);
                 setEnteringAmount(false);
                 setViewHome(true);
@@ -230,53 +247,66 @@ const HomePage = () => {
 
     function RecipeIngredientsLogic()
     {
-        let tempArray = [];
-        tempArray = foodsForRecipe
-        tempArray.push(selectedFoodName)
-        setFoodsForRecipe(tempArray);
-        console.log(foodsForRecipe);
-        /*******************************************************/
-        tempArray = gramsForRecipe
-        tempArray.push(grams);
-        setgramsForRecipe(tempArray);
-        console.log(gramsForRecipe);
+        let tempNam = [];
+        let tempGra = [];
+        let tempGraUsed = [];
+        let tempCals = [];
+        let tempPro = [];
+        let tempCar = [];
+        let tempFat = [];
 
-        let value = parseInt(customGrams, 10) + parseInt(grams, 10);
-        setCustomGrams(value);
-        /*******************************************************/
-        let division =  parseInt(currentMacros[0]  * (grams/currentMacros[4]), 10)
-        value = parseInt(customCalories, 10) + division;
-        setCustomCalories(value);
+        let totalGrams = parseInt(customUserData.grams, 10) + parseInt(grams, 10);
+        
+        let calories = parseInt(currentMacros.calories  * (grams/currentMacros.grams), 10)
+        let totalCals = parseInt(customUserData.calories, 10) + calories;
 
-        console.log(value)
-        tempArray = recipefoodCalories
-        tempArray.push(division)
-        setRecipeFoodCalories(tempArray);
-        /*******************************************************/
-        division = parseInt(currentMacros[1]  * (grams/currentMacros[4]), 10)
-        value = parseInt(customProtein, 10) + division;
-        setCustomProtein(value);
+        let protein = parseInt(currentMacros.protein  * (grams/currentMacros.grams), 10)
+        let totalPro = parseInt(customUserData.protein, 10) + protein;
 
-        tempArray = recipefoodProtein
-        tempArray.push(division)
-        setRecipeFoodProtein(tempArray);
-        /*******************************************************/
-        division = parseInt(currentMacros[2]  * (grams/currentMacros[4]), 10)
-        value = parseInt(customCarbs, 10) + division;
-        setCustomCarbs(value);
+        let carb = parseInt(currentMacros.carbs  * (grams/currentMacros.grams), 10)
+        let totalCar = parseInt(customUserData.carbs, 10) + carb;
 
-        tempArray = recipefoodCarbs
-        tempArray.push(division)
-        setRecipeFoodCarbs(tempArray);
-        /*******************************************************/
-        division = parseInt(currentMacros[3]  * (grams/currentMacros[4]), 10)
-        value = parseInt(customFat, 10) + division;
-        setCustomFat(value);
+        let fat = parseInt(currentMacros.fat  * (grams/currentMacros.grams), 10)
+        let totalFat = parseInt(customUserData.fat, 10) + fat;
 
-        tempArray = recipefoodFat
-        tempArray.push(division)
-        setRecipeFoodFat(tempArray);
-        /*******************************************************/
+        const combinedData2 ={
+            calories: totalCals,
+            protein: totalPro,
+            carbs: totalCar,
+            fat: totalFat,
+            grams: totalGrams,
+            name: customUserData.name
+        };
+
+        setCustomUserData(combinedData2);
+
+        tempNam = recipeData.map(item => item.name);
+        tempGra = recipeData.map(item => item.grams);
+        tempGraUsed = recipeData.map(item => item.gramsUsed);
+        tempCals = recipeData.map(item => item.calories);
+        tempPro = recipeData.map(item => item.protein);
+        tempCar = recipeData.map(item => item.carbs);
+        tempFat = recipeData.map(item => item.fat);
+
+        tempNam.push(selectedFoodName);
+        tempGra.push(grams);
+        tempGraUsed.push(grams);
+        tempCals.push(calories);
+        tempPro.push(protein);
+        tempCar.push(carb)
+        tempFat.push(fat)
+
+        const combinedData = tempCals.map((calories, index) => ({
+            calories,
+            protein: tempPro[index],
+            carbs: tempCar[index],
+            fat: tempFat[index],
+            grams: tempGra[index],
+            name: tempNam[index],
+            gramsUsed: tempGraUsed[index]
+        }));
+
+        setRecipeData(combinedData);
     }
 
     function FoodSelectedForRecipe(){
@@ -287,16 +317,24 @@ const HomePage = () => {
 
     function SetFoodSelectedData(foodname, index) {
         setSelectedFoodName(foodname);
-        setGrams(foodGrams[index]);
+        setGrams(foodDatabase[index].grams);
 
         let tempArray = [];
-        tempArray.push(foodCalories[index]);
-        tempArray.push(foodProtein[index]);
-        tempArray.push(foodCarbs[index]);
-        tempArray.push(foodFat[index]);
-        tempArray.push(foodGrams[index]);
+        tempArray.push(foodDatabase[index].calories);
+        tempArray.push(foodDatabase[index].protein);
+        tempArray.push(foodDatabase[index].carbs);
+        tempArray.push(foodDatabase[index].fat);
+        tempArray.push(foodDatabase[index].grams);
 
-        setCurrentMacros(tempArray);
+        const combinedData ={
+            calories: foodDatabase[index].calories,
+            protein: foodDatabase[index].protein,
+            carbs: foodDatabase[index].carbs,
+            fat: foodDatabase[index].fat,
+            grams: foodDatabase[index].grams,
+        };
+
+        setCurrentMacros(combinedData);
 
         if(viewFoods)
         {
@@ -311,14 +349,18 @@ const HomePage = () => {
 
     function EditFood(foodname, index){
         setSelectedFoodName(foodname);
-        setGrams(foodGramsUG[index]);
+        setGrams(UGFoodDatabase[index].grams);
 
-        setCustomName(foodname);
-        setCustomGrams(foodGramsUG[index]);;
-        setCustomCalories(foodCaloriesUG[index]);
-        setCustomProtein(foodProteinUG[index]);
-        setCustomCarbs(foodCarbsUG[index]);
-        setCustomFat(foodFatUG[index]);
+        const combinedData ={
+            calories: UGFoodDatabase[index].calories,
+            protein: UGFoodDatabase[index].protein,
+            carbs: UGFoodDatabase[index].carbs,
+            fat: UGFoodDatabase[index].fat,
+            grams: UGFoodDatabase[index].grams,
+            name: foodname
+        };
+
+        setCustomUserData(combinedData);
 
         setMyFoods(false);
         setEditCustomFoods(true);
@@ -326,7 +368,6 @@ const HomePage = () => {
 
     function EditRecipe(foodname){
         resetCustomValues();
-        //womp
         GetUserRecipeIngredients(foodname).then((foods) => {
             const combinedData = foods.tempFoodCaloriesList.map((calories, index) => ({
                 calories,
@@ -334,76 +375,44 @@ const HomePage = () => {
                 carbs: foods.tempFoodCarbsList[index],
                 fat: foods.tempFoodFatList[index],
                 grams: foods.tempFoodGramsList[index],
-                name: foods.tempFoodNamesList[index]
+                name: foods.tempFoodNamesList[index],
+                gramsUsed: foods.tempFoodGramsUsedList[index]
             }));
+
+            let totalGrams = 0;
+            let totalCals = 0;
+            let totalPro = 0;
+            let totalCarbs = 0;
+            let totalFat = 0;
+
+            for (const food of combinedData) 
+            {
+                totalGrams += parseInt(food.gramsUsed, 10);
+                totalCals += parseInt(food.calories, 10);
+                totalPro += parseInt(food.protein, 10);
+                totalCarbs += parseInt(food.carbs, 10);
+                totalFat += parseInt(food.fat, 10);
+            }
+
+            const combinedData2 ={
+                calories: totalCals,
+                protein: totalPro,
+                carbs: totalCarbs,
+                fat: totalFat,
+                grams: totalGrams,
+                name: foodname
+            };
+
+            setCustomUserData(combinedData2);
 
             console.log(combinedData);
 
-            setIngredientsFromDB(combinedData);
+            setRecipeData(combinedData)
         });
 
         setMyFoods(false);
         setEditRecipe(true);
     }
-
-    function DataFromRecipe(foods, index)
-    {
-        console.log("datafromrecipe");
-        let tempArray = [];
-        tempArray = foodsForRecipe
-        tempArray.push(foods[index].name)
-        setFoodsForRecipe(tempArray);
-        console.log(foodsForRecipe);
-        /*******************************************************/
-        tempArray = gramsForRecipe
-        tempArray.push(foods[index].grams);
-        setgramsForRecipe(tempArray);
-        console.log(gramsForRecipe);
-
-        let value = parseInt(customGrams, 10) + parseInt(foods[index].grams, 10);
-        setCustomGrams(value);
-        /*******************************************************/
-        let division =  parseInt(foods[index].calories  * (foods[index].grams/foods[index].grams), 10)
-        value = parseInt(customCalories, 10) + division; 
-        setCustomCalories(value); //this is the value listed at the top, the recipes total calories
-
-        tempArray = recipefoodCalories
-        tempArray.push(division)
-        setRecipeFoodCalories(tempArray);
-        /*******************************************************/
-        division = parseInt(foods[index].protein  * (foods[index].grams/foods[index].grams), 10)
-        value = parseInt(customProtein, 10) + division;
-        setCustomProtein(value);
-
-        tempArray = recipefoodProtein
-        tempArray.push(division)
-        setRecipeFoodProtein(tempArray);
-        /*******************************************************/
-        division = parseInt(foods[index].carbs  * (foods[index].grams/foods[index].grams), 10)
-        value = parseInt(customCarbs, 10) + division;
-        setCustomCarbs(value);
-
-        tempArray = recipefoodCarbs
-        tempArray.push(division)
-        setRecipeFoodCarbs(tempArray);
-        /*******************************************************/
-        division = parseInt(foods[index].fat  * (foods[index].grams/foods[index].grams), 10)
-        value = parseInt(customFat, 10) + division;
-        setCustomFat(value);
-
-        tempArray = recipefoodFat
-        tempArray.push(division)
-        setRecipeFoodFat(tempArray);
-        /*******************************************************/
-        console.log(index +":"+ingredientsFromDB.length)
-        setNextIndex(index+1);
-    }
-
-    useEffect(() =>{
-        console.log("heheh" + ingredientsFromDB.length);
-        if(ingredientsFromDB.length > nextIndex) 
-            DataFromRecipe(ingredientsFromDB, nextIndex)
-    }, [nextIndex, ingredientsFromDB])
 
     function AmountToViewing() {
         setViewFoods(true);
@@ -472,37 +481,51 @@ const HomePage = () => {
 
     function UpdateFoodLists(){
         GetFoodNames().then((foods) => {
+            const combinedData = foods.tempFoodCaloriesList.map((calories, index) => ({
+                calories,
+                protein: foods.tempFoodProteinList[index],
+                carbs: foods.tempFoodCarbsList[index],
+                fat: foods.tempFoodFatList[index],
+                grams: foods.tempFoodGramsList[index],
+                name: foods.tempFoodNamesList[index],
+            }));
 
-            setFoodNames(foods.tempFoodNamesList);
-            setFoodCalories(foods.tempFoodCaloriesList);
-            setFoodProtein(foods.tempFoodProteinList);
-            setFoodCarbs(foods.tempFoodCarbsList);
-            setFoodFat(foods.tempFoodFatList);
-            setFoodGrams(foods.tempFoodGramsList);
+            //console.log(combinedData);
+            //console.log(combinedData.length);
+            setFoodDatabase(combinedData);
         });
 
         GetUserGenFoodNames().then((foods) => {
-            setFoodNamesUG(foods.tempFoodNamesList);
-            setFoodCaloriesUG(foods.tempFoodCaloriesList);
-            setFoodProteinUG(foods.tempFoodProteinList);
-            setFoodCarbsUG(foods.tempFoodCarbsList);
-            setFoodFatUG(foods.tempFoodFatList);
-            setFoodGramsUG(foods.tempFoodGramsList);
+            const combinedData = foods.tempFoodCaloriesList.map((calories, index) => ({
+                calories,
+                protein: foods.tempFoodProteinList[index],
+                carbs: foods.tempFoodCarbsList[index],
+                fat: foods.tempFoodFatList[index],
+                grams: foods.tempFoodGramsList[index],
+                name: foods.tempFoodNamesList[index],
+            }));
+
+            setUGFoodDatabase(combinedData);
+
         })
 
         GetUserGenRecipes().then((foods) => {
-            setFoodNamesUGR(foods.tempFoodNamesList);
-            setFoodCaloriesUGR(foods.tempFoodCaloriesList);
-            setFoodProteinUGR(foods.tempFoodProteinList);
-            setFoodCarbsUGR(foods.tempFoodCarbsList);
-            setFoodFatUGR(foods.tempFoodFatList);
-            setFoodGramsUGR(foods.tempFoodGramsList);
+            const combinedData = foods.tempFoodCaloriesList.map((calories, index) => ({
+                calories,
+                protein: foods.tempFoodProteinList[index],
+                carbs: foods.tempFoodCarbsList[index],
+                fat: foods.tempFoodFatList[index],
+                grams: foods.tempFoodGramsList[index],
+                name: foods.tempFoodNamesList[index],
+            }));
+
+            setUGRFoodDatabase(combinedData);
         })
     }
 
 
     function AddCustomFoodToHome() {
-        UploadCustomFood(customName, customGrams, customCalories, customProtein, customCarbs, customFat).then(() => {
+        UploadCustomFood(customUserData.name, customUserData.grams, customUserData.calories, customUserData.protein, customUserData.carbs, customUserData.fat).then(() => {
             UpdateFoodLists();
         });
         setAddCustomFoods(false);
@@ -512,25 +535,31 @@ const HomePage = () => {
 
     function AddRecipeToHome(){
         let totalGrams = 0;
-        for (const gram of gramsForRecipe) 
-        {
-            totalGrams += parseInt(gram,10);
-        }
-        AddRecipe(customName, totalGrams, foodsForRecipe);
+
+        for (const food of recipeData) 
+            totalGrams += parseInt(food.grams, 10);
+
+        let foodsInRecipe = recipeData.map(item => item.name);
+        let gramsPerIngredient = recipeData.map(item => item.gramsUsed);
+
+        AddRecipe(customUserData.name, totalGrams, foodsInRecipe, gramsPerIngredient);
         UpdateFoodLists();
         setAddRecipe(false);
         setViewHome(true);
     }
 
     function SendEditFoodData (){
-        EditCustomFood(selectedFoodName, customName, customGrams, customCalories, customProtein, customCarbs, customFat).then(() => {
+        EditCustomFood(selectedFoodName, customUserData.name, customUserData.grams, customUserData.calories, customUserData.protein, customUserData.carbs, customUserData.fat).then(() => {
             UpdateFoodLists();
             GetUserTrackedFood().then((macros) => {
-                setCalories(macros.currentCalories);
-                setProtein(macros.currentProtein);
-                setCarbs(macros.currentCarbs);
-                setFat(macros.currentFat);
-
+                const renameData = {
+                    calories: macros.currentCalories,
+                    protein: macros.currentProtein,
+                    carbs: macros.currentCarbs,
+                    fat: macros.currentFat
+                }
+                console.log(renameData);
+                setCurrentTrackedMacros(renameData);
                 setEditCustomFoods(false);
                 setMyFoods(true);
                 resetCustomValues();
@@ -550,12 +579,7 @@ const HomePage = () => {
         setMyFoods(value);
         setEditCustomFoods(!value);
 
-        setCustomName("");
-        setCustomGrams(0);
-        setCustomCalories(0);
-        setCustomProtein(0);
-        setCustomCarbs(0);
-        setCustomFat(0);
+        resetCustomValues()
     }
 
     function myFoodsToRecipe(value)
@@ -613,112 +637,47 @@ const HomePage = () => {
                 {viewHome===false?<div></div>:
                 <div className='focused_window'>
                     <svg ref={calorieCanvas} className='focused_circle'>
-                        <circle 
-                            r={radius} 
-                            cx="50%" 
-                            cy="50%" 
-                            fill="transparent" 
-                            stroke="lightgrey" 
-                            strokeWidth="2rem" 
-                            strokeDasharray={circ} 
-                            strokeDashoffset="0"/>
-                        <circle 
-                            r={radius} //radius
-                            cx="50%" //origin x
-                            cy="50%"//origin y
-                            fill="transparent" //keep center transparent
-                            stroke="blue"  //colour of line
-                            strokeWidth="2rem" //with of line
-                            strokeDasharray={circ} //total size of circle
-                            strokeDashoffset={circ-circPercentage} //amount of circle NOT filled in
-                            style={{ transformOrigin: '50% 50%' }} //ensure circle starts from bottom filles clockwise
-                            transform={`rotate(90)`}/>
-                        <text className="text_in_circle" x="50%" y="45%" textAnchor="middle"> 
-                            <tspan x="50%" y="50%">{calories}/{calorieGoal}</tspan>
-                            <tspan x="50%" y="60%">{((parseFloat((calories / calorieGoal).toFixed(2))) * 100).toFixed(0)}%</tspan> 
-                        </text>
+                    <MacroCircle ref={calorieCanvas}
+                        radius={radius}
+                        circ={circ}
+                        circPercentage={circPercentage}
+                        currentTrackedMacros={currentTrackedMacros.calories}
+                        macroGoals={macroGoals.calorieGoal}
+                    />
                     </svg>
                 </div> 
                 }
                 {viewHome===false?<div></div>: 
                 <div className='unfocused_window'>
                     <svg ref={proteinCanvas} className='unfocused_square'>
-                        <circle 
-                            r={radiusUnfocused}
-                            cx="50%" 
-                            cy="50%" 
-                            fill="transparent" 
-                            stroke="lightgrey" 
-                            strokeWidth="1rem" 
-                            strokeDasharray={circUnfocused} 
-                            strokeDashoffset="0"/> 
-                        <circle 
-                            r={radiusUnfocused}
-                            cx="50%" 
-                            cy="50%" 
-                            fill="transparent" 
-                            stroke="green" 
-                            strokeWidth="1rem" 
-                            strokeDasharray={circUnfocused} 
-                            strokeDashoffset={circUnfocused-circPercentageProtein} 
-                            style={{ transformOrigin: '50% 50%' }} //ensure circle starts from bottom filles clockwise
-                            transform={`rotate(90)`}/>
-                        <text className="text_in_circle_unfocused" x="50%" y="45%" textAnchor="middle"> 
-                            <tspan x="50%" y="50%">{protein}/{proteinGoal}</tspan>
-                            <tspan x="50%" y="60%">{((parseFloat((protein / proteinGoal).toFixed(2))) * 100).toFixed(0)}%</tspan>
-                        </text>
+                        <MicroCircle
+                            radius={radiusUnfocused}
+                            circ={circUnfocused}
+                            circPercentage={circPercentageProtein}
+                            currentTrackedMacros={currentTrackedMacros.protein}
+                            macroGoals={macroGoals.proteinGoal}
+                            color="green"
+                        />
                     </svg>
                     <svg ref={carbCanvas} className='unfocused_square'>
-                        <circle 
-                            r={radiusUnfocused}
-                            cx="50%" 
-                            cy="50%" 
-                            fill="transparent" 
-                            stroke="lightgrey" 
-                            strokeWidth="1rem" 
-                            strokeDasharray={circUnfocused} 
-                            strokeDashoffset="0"/> 
-                        <circle 
-                            r={radiusUnfocused}
-                            cx="50%" 
-                            cy="50%" 
-                            fill="transparent" 
-                            stroke="red" 
-                            strokeWidth="1rem" 
-                            strokeDasharray={circUnfocused} 
-                            strokeDashoffset={circUnfocused-circPercentageCarbs}
-                            style={{ transformOrigin: '50% 50%' }} //ensure circle starts from bottom filles clockwise
-                            transform={`rotate(90)`}/>
-                        <text className="text_in_circle_unfocused" x="50%" y="45%" textAnchor="middle"> 
-                            <tspan x="50%" y="50%">{carbs}/{carbGoal}</tspan>
-                            <tspan x="50%" y="60%">{((parseFloat((carbs / carbGoal).toFixed(2))) * 100).toFixed(0)}%</tspan>
-                        </text>
+                        <MicroCircle
+                            radius={radiusUnfocused}
+                            circ={circUnfocused}
+                            circPercentage={circPercentageCarbs}
+                            currentTrackedMacros={currentTrackedMacros.carbs}
+                            macroGoals={macroGoals.carbGoal}
+                            color="red"
+                        />
                     </svg>
                     <svg ref={fatCanvas} className='unfocused_square'>
-                        <circle 
-                            r={radiusUnfocused}
-                            cx="50%" 
-                            cy="50%" 
-                            fill="transparent" 
-                            stroke="lightgrey" 
-                            strokeWidth="1rem" 
-                            strokeDasharray={circUnfocused} 
-                            strokeDashoffset="0"/> 
-                        <circle 
-                            r={radiusUnfocused}
-                            cx="50%" 
-                            cy="50%" 
-                            fill="transparent" 
-                            stroke="blue" 
-                            strokeWidth="1rem" 
-                            strokeDasharray={circUnfocused} 
-                            strokeDashoffset={circUnfocused-circPercentageFat}
-                            style={{ transformOrigin: '50% 50%' }} //ensure circle starts from bottom filles clockwise
-                            transform={`rotate(90)`}/>
-                        <text className="text_in_circle_unfocused" x="50%" y="45%" textAnchor="middle"> 
-                            <tspan x="50%" y="50%">{fat}/{fatGoal}</tspan>
-                            <tspan x="50%" y="60%">{((parseFloat((fat / fatGoal).toFixed(2))) * 100).toFixed(0)}%</tspan>
-                        </text>
+                        <MicroCircle
+                            radius={radiusUnfocused}
+                            circ={circUnfocused}
+                            circPercentage={circPercentageFat}
+                            currentTrackedMacros={currentTrackedMacros.fat}
+                            macroGoals={macroGoals.fatGoal}
+                            color="blue"
+                        />
                     </svg> 
                 </div>}
             </div> {/* SHOW LIST OF ALL FOODS USER HAS ACCESS TO IN DATABASE FOR EITHER ADDING FOOD TO TRACKER OR ADDING TO RECIPE*/}
@@ -734,27 +693,17 @@ const HomePage = () => {
                     <div className="button beside" onClick={()=>AddRecipeToAddFoodToRecipe(false)}>Back</div>
                     :<div></div>}
 
-                <div className="foods_in_menu">
-                    <div className="name">Name</div>
-                    <div className="macro">Grams Per Serving</div>
-                    <div className="macro">Calories</div>
-                    <div className="macro">Protein</div>
-                    <div className="macro">Carbs</div>
-                    <div className="macro">Fat</div>
-                </div>
+                <GeneralHeader/>
                 <div className="scrollable">
-                    {foodNames.map((foodname, index) => ( //functions as a foreach loop //this onclick should open another menu with a text box to enter the amount of grams eaten with a submit and back button
-                        <div key={index} onClick={()=>SetFoodSelectedData(foodname, index)} className="foods_in_menu body hoverable">
-
-                            <div className={index === 0 ? 'name' : 'name'}>
-                                {foodname}
-                            </div>
-                            <div className="macro">{foodGrams[index]}</div>
-                            <div className="macro">{foodCalories[index]}</div>
-                            <div className="macro">{foodProtein[index]}</div>
-                            <div className="macro">{foodCarbs[index]}</div>
-                            <div className="macro">{foodFat[index]}</div>
-                        </div>
+                    {foodDatabase.map((foodItem, index) => (
+                    <div key={index} onClick={() => SetFoodSelectedData(foodItem.name, index)} className="foods_in_menu body hoverable">
+                        <div className="name">{foodItem.name}</div>
+                        <div className="macro">{foodItem.grams}</div>
+                        <div className="macro">{foodItem.calories}</div>
+                        <div className="macro">{foodItem.protein}</div>
+                        <div className="macro">{foodItem.carbs}</div>
+                        <div className="macro">{foodItem.fat}</div>
+                    </div>
                     ))}
                 </div>
             </div>
@@ -769,12 +718,10 @@ const HomePage = () => {
                             <div className="selected">Fat</div>
                         </div>
                         <div className="foods_in_menu body">
-                            {/*currentMacros is an array of the values for the food selected in view foods
-                            0 = calories, 1 = protein, 2 = carbs, 3 = fat, 4 = grams per 1 serving*/}
-                            <div className="selected">{Math.floor((currentMacros[0]) * (grams/currentMacros[4]))}</div>
-                            <div className="selected">{Math.floor((currentMacros[1]) * (grams/currentMacros[4]))}</div>
-                            <div className="selected">{Math.floor((currentMacros[2]) * (grams/currentMacros[4]))}</div>
-                            <div className="selected">{Math.floor((currentMacros[3]) * (grams/currentMacros[4]))}</div>
+                            <div className="selected">{Math.floor((currentMacros.calories) * (grams/currentMacros.grams))}</div>
+                            <div className="selected">{Math.floor((currentMacros.protein) * (grams/currentMacros.grams))}</div>
+                            <div className="selected">{Math.floor((currentMacros.carbs) * (grams/currentMacros.grams))}</div>
+                            <div className="selected">{Math.floor((currentMacros.fat) * (grams/currentMacros.grams))}</div>
                         </div>
                     </div>
                     <div className="text">
@@ -799,50 +746,43 @@ const HomePage = () => {
             } {/* USER ADDING FOOD TO DATABASE*/}
             {addCustomFoods===false?<div></div>:
                 <div className="inputAmount">
-                    <div className="foods_in_menu">
-                        <div className="name">Name</div>
-                        <div className="macro">Grams Per Serving</div>
-                        <div className="macro">Calories</div>
-                        <div className="macro">Protein</div>
-                        <div className="macro">Carbs</div>
-                        <div className="macro">Fat</div>
-                    </div>
+                    <GeneralHeader/>
                     <div className="foods_in_menu body">
                         <div className="name">
                             <input type="string" placeholder="Name"
                             required
-                            value={customName}
-                            onChange={(e)=>setCustomName(e.target.value)}/>
+                            value={customUserData.name}
+                            onChange={(e)=>setCustomUserData({...customUserData, name: e.target.value})}/>
                         </div>
                         <div className="macro">
                             <input type="int" placeholder="Grams"
                             required
-                            value={customGrams}
-                            onChange={(e)=>setCustomGrams(e.target.value)}/>
+                            value={customUserData.grams}
+                            onChange={(e)=>setCustomUserData({...customUserData, grams: e.target.value})}/>
                         </div>
                         <div className="macro">
                             <input type="int" placeholder="Calories"
                             required
-                            value={customCalories}
-                            onChange={(e)=>setCustomCalories(e.target.value)}/>
+                            value={customUserData.calories}
+                            onChange={(e)=>setCustomUserData({...customUserData, calories: e.target.value})}/>
                         </div>
                         <div className="macro">
                             <input type="int" placeholder="Protein"
                             required
-                            value={customProtein}
-                            onChange={(e)=>setCustomProtein(e.target.value)}/>
+                            value={customUserData.protein}
+                            onChange={(e)=>setCustomUserData({...customUserData, protein: e.target.value})}/>
                         </div>
                         <div className="macro">
                             <input type="int" placeholder="Carbs"
                             required
-                            value={customCarbs}
-                            onChange={(e)=>setCustomCarbs(e.target.value)}/>
+                            value={customUserData.carbs}
+                            onChange={(e)=>setCustomUserData({...customUserData, carbs: e.target.value})}/>
                         </div>
                         <div className="macro">
                             <input type="int" placeholder="Fat"
                             required
-                            value={customFat}
-                            onChange={(e)=>setCustomFat(e.target.value)}/>
+                            value={customUserData.fat}
+                            onChange={(e)=>setCustomUserData({...customUserData, fat: e.target.value})}/>
                         </div>
                     </div>
                     <div className="horizontal_buttons">
@@ -850,7 +790,7 @@ const HomePage = () => {
                         <div className="button beside" onClick={()=>AddCustomFoodToMyFood(true)}>Back</div>
                     </div>
                 </div>
-            }{/* USER LOOKING AT ALL THEIR FOODS IN DB WITH OPTION TO DELETE, EDIT OR ADD*/}
+            }{/* USER LOOKING AT ALL THEIR FOODS IN DB WITH OPTION TO EDIT OR ADD*/}
             {myFoods===false?<div></div>:
                 <div>
                     <div className="vertical_menu">
@@ -859,52 +799,34 @@ const HomePage = () => {
                             <div className="button" style={{fontSize:"17px"}} onClick={()=>{MyFoodToAddCustomFood(true);}}>Add Food</div>
                             <div className="button" style={{fontSize:"17px"}} onClick={()=>{myFoodsToRecipe(true);}}>Add Recipe</div>
                         </div>
-                        <div className="foods_in_menu">
-                            <div className="name">Food Name</div>
-                            <div className="macro">Grams Per Serving</div>
-                            <div className="macro">Calories</div>
-                            <div className="macro">Protein</div>
-                            <div className="macro">Carbs</div>
-                            <div className="macro">Fat</div>
-                        </div>
+                        <GeneralHeader/>
                         <div className="scrollable">
-                            {foodNamesUG.map((foodname, index) => ( 
-                                <div key={index} onClick={()=>{EditFood(foodname, index)}} className="foods_in_menu body hoverable">
-                                    <div className={index === 0 ? 'name' : 'name'}>
-                                        {foodname}
-                                    </div>
-                                    <div className="macro">{foodGramsUG[index]}</div>
-                                    <div className="macro">{foodCaloriesUG[index]}</div>
-                                    <div className="macro">{foodProteinUG[index]}</div>
-                                    <div className="macro">{foodCarbsUG[index]}</div>
-                                    <div className="macro">{foodFatUG[index]}</div>
-                                </div>
-                            ))}
+                        {UGFoodDatabase.map((foodItem, index) => (
+                        <div key={index} onClick={() => EditFood(foodItem.name, index)} className="foods_in_menu body hoverable">
+                            <div className="name">{foodItem.name}</div>
+                            <div className="macro">{foodItem.grams}</div>
+                            <div className="macro">{foodItem.calories}</div>
+                            <div className="macro">{foodItem.protein}</div>
+                            <div className="macro">{foodItem.carbs}</div>
+                            <div className="macro">{foodItem.fat}</div>
                         </div>
+                        ))}
+                    </div>
                     </div>
                     <div style={{paddingBottom: "8%"}}></div>
                     <div className="vertical_menu">
-                        <div className="foods_in_menu">
-                            <div className="name">Recipe Name</div>
-                            <div className="macro">Grams Per Serving</div>
-                            <div className="macro">Calories</div>
-                            <div className="macro">Protein</div>
-                            <div className="macro">Carbs</div>
-                            <div className="macro">Fat</div>
-                        </div>
+                        <RecipeHeader/>
                         <div className="scrollable">
-                            {foodNamesUGR.map((foodname, index) => ( 
-                                <div key={index} onClick={()=>{EditRecipe(foodname, index)}} className="foods_in_menu body hoverable">
-                                    <div className={index === 0 ? 'name' : 'name'}>
-                                        {foodname}
-                                    </div>
-                                    <div className="macro">{foodGramsUGR[index]}</div>
-                                    <div className="macro">{foodCaloriesUGR[index]}</div>
-                                    <div className="macro">{foodProteinUGR[index]}</div>
-                                    <div className="macro">{foodCarbsUGR[index]}</div>
-                                    <div className="macro">{foodFatUGR[index]}</div>
-                                </div>
-                            ))}
+                        {UGRFoodDatabase.map((foodItem, index) => (
+                            <div key={index} onClick={() => EditRecipe(foodItem.name, index)} className="foods_in_menu body hoverable">
+                                <div className="name">{foodItem.name}</div>
+                                <div className="macro">{foodItem.grams}</div>
+                                <div className="macro">{foodItem.calories}</div>
+                                <div className="macro">{foodItem.protein}</div>
+                                <div className="macro">{foodItem.carbs}</div>
+                                <div className="macro">{foodItem.fat}</div>
+                            </div>
+                        ))}
                         </div>
                     </div>
                 </div>
@@ -912,50 +834,43 @@ const HomePage = () => {
             {/* USER EDITING OR DELETING CUSTOM FOODS*/}
             {editCustomFoods===false?<div></div>:
                 <div className="inputAmount">
-                    <div className="foods_in_menu">
-                        <div className="name">Name</div>
-                        <div className="macro">Grams Per Serving</div>
-                        <div className="macro">Calories</div>
-                        <div className="macro">Protein</div>
-                        <div className="macro">Carbs</div>
-                        <div className="macro">Fat</div>
-                    </div>
+                    <GeneralHeader/>
                     <div className="foods_in_menu body">
                         <div className="name">
                             <input type="string" placeholder="Name"
                             required
-                            value={customName}
-                            onChange={(e)=>setCustomName(e.target.value)}/>
+                            value={customUserData.name}
+                            onChange={(e)=>setCustomUserData({...customUserData, name: e.target.value})}/>
                         </div>
                         <div className="macro">
                             <input type="int" placeholder="Grams"
                             required
-                            value={customGrams}
-                            onChange={(e)=>setCustomGrams(e.target.value)}/>
+                            value={customUserData.grams}
+                            onChange={(e)=>setCustomUserData({...customUserData, grams: e.target.value})}/>
                         </div>
                         <div className="macro">
                             <input type="int" placeholder="Calories"
                             required
-                            value={customCalories}
-                            onChange={(e)=>setCustomCalories(e.target.value)}/>
+                            value={customUserData.calories}
+                            onChange={(e)=>setCustomUserData({...customUserData, calories: e.target.value})}/>
                         </div>
                         <div className="macro">
                             <input type="int" placeholder="Protein"
                             required
-                            value={customProtein}
-                            onChange={(e)=>setCustomProtein(e.target.value)}/>
+                            value={customUserData.protein}
+                            onChange={(e)=>setCustomUserData({...customUserData, protein: e.target.value})}/>
                         </div>
                         <div className="macro">
                             <input type="int" placeholder="Carbs"
                             required
-                            value={customCarbs}
-                            onChange={(e)=>setCustomCarbs(e.target.value)}/>
+                            value={customUserData.carbs}
+                            onChange={(e)=>setCustomUserData({...customUserData, carbs: e.target.value})}/>
                         </div>
                         <div className="macro">
                             <input type="int" placeholder="Fat"
                             required
-                            value={customFat}
-                            onChange={(e)=>setCustomFat(e.target.value)}/>
+                            value={customUserData.fat}
+                            onChange={(e)=>setCustomUserData({...customUserData, fat: e.target.value})}/>
                         </div>
                     </div>
                     <div className="horizontal_buttons">
@@ -982,60 +897,43 @@ const HomePage = () => {
             {/*USER IS ADDING A RECIPE*/}
             {addRecipe===false && editRecipe===false?<div></div>:
             <div className="inputAmount">
-                <div className="foods_in_menu">
-                    <div className="name">Recipe Name</div>
-                    <div className="macro">Total Grams</div>
-                    <div className="macro">Calories</div>
-                    <div className="macro">Protein</div>
-                    <div className="macro">Carbs</div>
-                    <div className="macro">Fat</div>
-                </div>
+                <RecipeHeader/>
                 <div className="foods_in_menu body">
                     <div className="name">
                         <input type="string" placeholder="Name"
                         required
-                        value={customName}
-                        onChange={(e)=>setCustomName(e.target.value)}/>
+                        value={customUserData.name}
+                        onChange={(e)=>setCustomUserData({...customUserData, name: e.target.value})}/>
                     </div>
                     <div className="macro">
-                        {customGrams}
+                        {customUserData.grams}
                     </div>
                     <div className="macro">
-                        {customCalories}
+                        {customUserData.calories}
                     </div>
                     <div className="macro">
-                        {customProtein}
+                        {customUserData.protein}
                     </div>
                     <div className="macro">
-                        {customCarbs}
+                        {customUserData.carbs}
                     </div>
                     <div className="macro">
-                        {customFat}
+                        {customUserData.fat}
                     </div>
                 </div>
 
-                <div className="foods_in_menu">
-                    <div className="name">Ingredients Name</div>
-                    <div className="macro">Grams</div>
-                    <div className="macro">Calories</div>
-                    <div className="macro">Protein</div>
-                    <div className="macro">Carbs</div>
-                    <div className="macro">Fat</div>
-                </div>
+                <IngredientsHeader/>
                 <div className="scrollable">
-                    {foodsForRecipe.map((foodname, index) => ( //functions as a foreach loop
-                        <div key={index} className="foods_in_menu body">
-
-                            <div className={index === 0 ? 'name' : 'name'}>
-                                {foodname}
-                            </div>
-                            <div className="macro">{gramsForRecipe[index]}</div>
-                            <div className="macro">{recipefoodCalories[index]}</div>
-                            <div className="macro">{recipefoodProtein[index]}</div>
-                            <div className="macro">{recipefoodCarbs[index]}</div>
-                            <div className="macro">{recipefoodFat[index]}</div>
-                        </div>
-                    ))}
+                    {recipeData.map((foodItem, index) => (
+                    <div key={index} className="foods_in_menu body">
+                        <div className="name">{foodItem.name}</div>
+                        <div className="macro">{foodItem.gramsUsed}</div>
+                        <div className="macro">{foodItem.calories}</div>
+                        <div className="macro">{foodItem.protein}</div>
+                        <div className="macro">{foodItem.carbs}</div>
+                        <div className="macro">{foodItem.fat}</div>
+                    </div>
+                ))}
                 </div>
 
                 {editRecipe===false?
@@ -1046,7 +944,7 @@ const HomePage = () => {
                 </div>:
                 <div className="horizontal_buttons">
                     <div className="button beside" onClick={()=>AddRecipeToHome()}>Save</div>
-                    <div className="button beside" onClick={()=>AddRecipeToAddFoodToRecipe(true)}>Add Food</div>
+                    <div className="button beside" onClick={()=>AddRecipeToAddFoodToRecipe(true)}>AddFood</div>
                     <div className="button beside" onClick={()=>myFoodToEditRecipe(false)}>Back</div>
                     <div className="button beside delete">Delete</div>
                 </div>
