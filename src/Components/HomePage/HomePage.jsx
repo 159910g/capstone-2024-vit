@@ -7,7 +7,7 @@ import { Chart as ChartJS } from "chart.js/auto";
 import { Bar } from "react-chartjs-2";
 //import Chart  from './Chart.jsx';
 import { useNavigate } from 'react-router-dom';
-import { GetUserGoals, GetUserTrackedFood, GetFoodNames, AddToTrackedFood, UploadCustomFood, GetUserGenFoodNames, EditCustomFood, CheckDate, DeleteCustomFood, GetUserHistory, AddRecipe, GetUserGenRecipes, GetUserRecipeIngredients } from './DatabaseCalls.jsx';
+import { GetUserGoals, GetUserTrackedFood, GetFoodNames, AddToTrackedFood, UploadCustomFood, GetUserGenFoodNames, EditCustomFood, CheckDate, DeleteCustomFood, GetUserHistory, AddRecipe, GetUserGenRecipes, GetUserRecipeIngredients, DeleteUserRecipe, EditUserRecipe } from './DatabaseCalls.jsx';
 
 const HomePage = () => {
     const nav = useNavigate();
@@ -52,6 +52,8 @@ const HomePage = () => {
 
     //arrays of food information for displaying the database
     const[foodDatabase, setFoodDatabase] = useState([]);
+
+    const[editingRecipePipe, setEditingRecipePipe] = useState(false);
     
     //arrays of food information for displaying the recipe
     const[recipeData, setRecipeData] = useState([{
@@ -114,6 +116,7 @@ const HomePage = () => {
 
 
     const[selectedFoodName, setSelectedFoodName] = useState("");
+    const[selectedRecipeName, setSelectedRecipeName] = useState("");
 
     useEffect (() => {
         //console.log("On Page Load...");
@@ -312,7 +315,10 @@ const HomePage = () => {
     function FoodSelectedForRecipe(){
         RecipeIngredientsLogic();
         setEnteringAmountForRecipe(false);
-        setAddRecipe(true);
+        if (!editingRecipePipe)
+            setAddRecipe(true); //need to setEditRecipe(true);
+        else
+            setEditRecipe(true);
     }
 
     function SetFoodSelectedData(foodname, index) {
@@ -368,6 +374,9 @@ const HomePage = () => {
 
     function EditRecipe(foodname){
         resetCustomValues();
+
+        setSelectedRecipeName(foodname);
+
         GetUserRecipeIngredients(foodname).then((foods) => {
             const combinedData = foods.tempFoodCaloriesList.map((calories, index) => ({
                 calories,
@@ -445,11 +454,24 @@ const HomePage = () => {
         setMyFoods(!value);
     }
 
-    function AddRecipeToAddFoodToRecipe(value)
+    function AddRecipeToAddFoodToRecipe(value, editingPipeline=false)
     {
-        setAddFoodtoRecipe(value);
-        setEditRecipe(!value);
-        setAddRecipe(!value);
+        GetFoodNames(false).then((foods) => {
+            const combinedData = foods.tempFoodCaloriesList.map((calories, index) => ({
+                calories,
+                protein: foods.tempFoodProteinList[index],
+                carbs: foods.tempFoodCarbsList[index],
+                fat: foods.tempFoodFatList[index],
+                grams: foods.tempFoodGramsList[index],
+                name: foods.tempFoodNamesList[index],
+            }));
+            setFoodDatabase(combinedData);
+
+            setEditingRecipePipe(editingPipeline);
+            setAddFoodtoRecipe(value);
+            setEditRecipe(!value);
+            setAddRecipe(!value);
+        });
     }
 
     function HomeToHistory(value){
@@ -480,7 +502,7 @@ const HomePage = () => {
     }
 
     function UpdateFoodLists(){
-        GetFoodNames().then((foods) => {
+        GetFoodNames(true).then((foods) => {
             const combinedData = foods.tempFoodCaloriesList.map((calories, index) => ({
                 calories,
                 protein: foods.tempFoodProteinList[index],
@@ -525,6 +547,7 @@ const HomePage = () => {
 
 
     function AddCustomFoodToHome() {
+        console.log("upload");
         UploadCustomFood(customUserData.name, customUserData.grams, customUserData.calories, customUserData.protein, customUserData.carbs, customUserData.fat).then(() => {
             UpdateFoodLists();
         });
@@ -546,6 +569,23 @@ const HomePage = () => {
         UpdateFoodLists();
         setAddRecipe(false);
         setViewHome(true);
+    }
+
+    function EditRecipeToMyFoods(){
+        let totalGrams = 0;
+
+        for (const food of recipeData) 
+            totalGrams += parseInt(food.grams, 10);
+
+        let foodsInRecipe = recipeData.map(item => item.name);
+        let gramsPerIngredient = recipeData.map(item => item.gramsUsed);
+
+        console.log(selectedRecipeName +" -> "+ customUserData.name)
+        EditUserRecipe(selectedRecipeName, customUserData.name, totalGrams, foodsInRecipe, gramsPerIngredient).then(() =>{
+            UpdateFoodLists();
+            setEditRecipe(false);
+            setMyFoods(true);
+        });
     }
 
     function SendEditFoodData (){
@@ -575,6 +615,14 @@ const HomePage = () => {
         });
     }
 
+    function DeleteRecipe(){
+        DeleteUserRecipe(selectedFoodName).then(() =>{
+            UpdateFoodLists();
+            setMyFoods(true);
+            setEditRecipe(false);
+        });
+    }
+
     function EditFoodToMyFood(value) {
         setMyFoods(value);
         setEditCustomFoods(!value);
@@ -593,6 +641,7 @@ const HomePage = () => {
     {
         setMyFoods(!value);
         setEditRecipe(value);
+        setAddRecipe(value);
         resetCustomValues();
     }
 
@@ -734,11 +783,11 @@ const HomePage = () => {
                         onChange={(e)=>setGrams(e.target.value)}/>
                     </div>
                     {enteringAmount===false?
-                    <div className="horizontal_buttons"> {/*this  whole block will be used when adding food  recipe except need an extra check here at the bottom*/}
+                    <div className="horizontal_buttons">
                         <div className="button beside" onClick={()=>FoodSelectedForRecipe()}>Confirm</div>
                         <div className="button beside" onClick={()=>AmountToViewingRecipe()}>Back</div>
                     </div>:
-                    <div className="horizontal_buttons"> {/*this  whole block will be used when adding food  recipe except need an extra check here at the bottom*/}
+                    <div className="horizontal_buttons"> 
                         <div className="button beside" onClick={()=>FoodSelected()}>Confirm</div>
                         <div className="button beside" onClick={()=>AmountToViewing()}>Back</div>
                     </div>}
@@ -939,14 +988,14 @@ const HomePage = () => {
                 {editRecipe===false?
                 <div className="horizontal_buttons">
                     <div className="button beside" onClick={()=>AddRecipeToHome()}>Save</div>
-                    <div className="button beside" onClick={()=>AddRecipeToAddFoodToRecipe(true)}>Add Food</div>
+                    <div className="button beside" onClick={()=>AddRecipeToAddFoodToRecipe(true, false)}>Add Food</div>
                     <div className="button beside" onClick={()=>myFoodsToRecipe(false)}>Back</div>
                 </div>:
                 <div className="horizontal_buttons">
-                    <div className="button beside" onClick={()=>AddRecipeToHome()}>Save</div>
-                    <div className="button beside" onClick={()=>AddRecipeToAddFoodToRecipe(true)}>AddFood</div>
+                    <div className="button beside" onClick={()=>EditRecipeToMyFoods()}>Save</div>
+                    <div className="button beside" onClick={()=>AddRecipeToAddFoodToRecipe(true, true)}>AddFood</div>
                     <div className="button beside" onClick={()=>myFoodToEditRecipe(false)}>Back</div>
-                    <div className="button beside delete">Delete</div>
+                    <div className="button beside delete" onClick={()=>DeleteRecipe()}>Delete</div>
                 </div>
                 }
             </div>

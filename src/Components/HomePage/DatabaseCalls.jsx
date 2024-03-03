@@ -97,15 +97,15 @@ export function GetUserTrackedFood () {
 }
 
 //gets the database of all foods the user has access to view
-export function GetFoodNames () {
+export function GetFoodNames (getRecipes) {
     let user_id = sessionStorage.getItem('loggedInUser');
-
+    const data = {user_id, getRecipes};
     return new Promise((resolve, reject) =>{
         var xhr = new XMLHttpRequest();
         xhr.open('POST', 'https://capstone2024.com/homePage.php?action=GetFoodNames');
         xhr.responseType = 'text';
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.send('useridJSON=' + encodeURIComponent(JSON.stringify(user_id)));
+        xhr.send('sentDataJSON=' + encodeURIComponent(JSON.stringify(data)));
         xhr.addEventListener('load', function() {
             if (xhr.status === 200) {
                 //console.log(xhr.responseText);
@@ -280,6 +280,7 @@ export function AddToTrackedFood (foodName, grams) {
 
 //takes food data and sends it do database
 export function UploadCustomFood(name, grams, calories, protein, carbs, fat){
+    console.log("upload");
     let user_id = sessionStorage.getItem('loggedInUser');
     const data = {user_id, name, grams, calories, protein, carbs, fat}
     return new Promise((resolve, reject) =>{
@@ -290,6 +291,7 @@ export function UploadCustomFood(name, grams, calories, protein, carbs, fat){
         xhr.send('sentData=' + encodeURIComponent(JSON.stringify(data)));
         xhr.addEventListener('load', function() {
             if (xhr.status === 200) {
+                console.log(xhr.responseText);
                 resolve();
             } else {
                 reject('Error: ' + xhr.status); // log any errors to the console
@@ -310,6 +312,27 @@ export function EditCustomFood(oldName, name, grams, calories, protein, carbs, f
         xhr.send('sentData=' + encodeURIComponent(JSON.stringify(data)));
         xhr.addEventListener('load', function() {
             if (xhr.status === 200) {
+                //console.log(xhr.responseText);
+                resolve();
+            } else {
+                reject('Error: ' + xhr.status); // log any errors to the console
+            }
+        });
+    });
+}
+
+export function EditUserRecipe(oldRecipeName, recipeName, grams, foodnames, gramsPerIngredient){
+    let user_id = sessionStorage.getItem('loggedInUser');
+    const data = {user_id, oldRecipeName, recipeName, grams, foodnames, gramsPerIngredient}
+    return new Promise((resolve, reject) =>{
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'https://capstone2024.com/homePage.php?action=EditRecipe');
+        xhr.responseType = 'text';
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.send('sentData=' + encodeURIComponent(JSON.stringify(data)));
+        xhr.addEventListener('load', function() {
+            if (xhr.status === 200) {
+                console.log(xhr.responseText);
                 resolve();
             } else {
                 reject('Error: ' + xhr.status); // log any errors to the console
@@ -344,6 +367,27 @@ export function DeleteCustomFood(foodName){
     return new Promise((resolve, reject) =>{
         var xhr = new XMLHttpRequest();
         xhr.open('POST', 'https://capstone2024.com/homePage.php?action=DeleteCustomFood');
+        xhr.responseType = 'text';
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.send('sentData=' + encodeURIComponent(JSON.stringify(data)));
+        xhr.addEventListener('load', function() {
+            if (xhr.status === 200) {
+                console.log(xhr.responseText);
+                resolve();
+            } else {
+                reject('Error: ' + xhr.status); // log any errors to the console
+            }
+        });
+    });
+}
+
+export function DeleteUserRecipe(recipeName){
+    console.log("delete recipe");
+    let user_id = sessionStorage.getItem('loggedInUser');
+    const data = {user_id, recipeName}
+    return new Promise((resolve, reject) =>{
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'https://capstone2024.com/homePage.php?action=DeleteRecipe');
         xhr.responseType = 'text';
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.send('sentData=' + encodeURIComponent(JSON.stringify(data)));
