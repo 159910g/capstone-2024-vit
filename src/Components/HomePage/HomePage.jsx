@@ -41,6 +41,7 @@ const HomePage = () => {
     const[viewFoods, setViewFoods] = useState(false);
     const[addCustomFoods, setAddCustomFoods] = useState(false);
     const[enteringAmount, setEnteringAmount] = useState(false);
+    const[editingAmount, setEditingAmount] = useState(false);
     const[viewHome, setViewHome] = useState(true);
     const[myFoods, setMyFoods] = useState(false);
     const[editCustomFoods, setEditCustomFoods] = useState(false);
@@ -117,6 +118,8 @@ const HomePage = () => {
 
     const[selectedFoodName, setSelectedFoodName] = useState("");
     const[selectedRecipeName, setSelectedRecipeName] = useState("");
+
+    const[globalIndex, setGlobalIndex] = useState(0);
 
     useEffect (() => {
         //console.log("On Page Load...");
@@ -353,6 +356,84 @@ const HomePage = () => {
         }
     }
 
+    function EditFoodInRecipes(index)
+    {
+        console.log("edit recipe");
+        setGlobalIndex(index);
+        setSelectedFoodName(recipeData[index.name])
+        setGrams(recipeData[index].gramsUsed);
+        setCurrentMacros({
+            calories: recipeData[index].calories,
+            protein: recipeData[index].protein,
+            carbs: recipeData[index].carbs,
+            fat: recipeData[index].fat,
+            grams: recipeData[index].grams
+        })
+
+        setCustomUserData({
+            name: customUserData.name,
+            grams: customUserData.grams - recipeData[index].gramsUsed,
+            calories: customUserData.calories - recipeData[index].calories,
+            protein: customUserData.protein - recipeData[index].protein,
+            carbs: customUserData.carbs - recipeData[index].carbs,
+            fat: customUserData.fat - recipeData[index].fat
+        })
+
+        if(editRecipe)
+            setEditingRecipePipe(true);
+        else
+            setEditingRecipePipe(false);
+
+        setEditRecipe(false);
+        setAddRecipe(false);
+        setEditingAmount(true);
+    }
+
+    function UpdateRecipeIngredients()
+    {
+        console.log("update recipe")
+        const updatedRecipeData = recipeData;
+
+        let totalGrams = parseInt(customUserData.grams, 10) + parseInt(grams, 10);
+        
+        let calories = parseInt(currentMacros.calories  * (grams/currentMacros.grams), 10)
+        let totalCals = parseInt(customUserData.calories, 10) + calories;
+
+        let protein = parseInt(currentMacros.protein  * (grams/currentMacros.grams), 10)
+        let totalPro = parseInt(customUserData.protein, 10) + protein;
+
+        let carb = parseInt(currentMacros.carbs  * (grams/currentMacros.grams), 10)
+        let totalCar = parseInt(customUserData.carbs, 10) + carb;
+
+        let fat = parseInt(currentMacros.fat  * (grams/currentMacros.grams), 10)
+        let totalFat = parseInt(customUserData.fat, 10) + fat;
+        
+        updatedRecipeData[globalIndex].calories = calories;
+        updatedRecipeData[globalIndex].protein = protein;
+        updatedRecipeData[globalIndex].carbs = carb;
+        updatedRecipeData[globalIndex].fat = fat;
+        updatedRecipeData[globalIndex].gramsUsed = grams;
+
+        setRecipeData(updatedRecipeData);
+
+        setCustomUserData({
+            name: customUserData.name,
+            grams: totalGrams,
+            calories: totalCals,
+            protein: totalPro,
+            carbs: totalCar,
+            fat: totalFat
+        })
+
+
+        if(editingRecipePipe)
+            setEditRecipe(true);
+        else    
+            setAddRecipe(true);
+
+        setEditingAmount(false);
+    }
+
     function EditFood(foodname, index){
         setSelectedFoodName(foodname);
         setGrams(UGFoodDatabase[index].grams);
@@ -512,8 +593,6 @@ const HomePage = () => {
                 name: foods.tempFoodNamesList[index],
             }));
 
-            //console.log(combinedData);
-            //console.log(combinedData.length);
             setFoodDatabase(combinedData);
         });
 
@@ -560,7 +639,7 @@ const HomePage = () => {
         let totalGrams = 0;
 
         for (const food of recipeData) 
-            totalGrams += parseInt(food.grams, 10);
+            totalGrams += parseInt(food.gramsUsed, 10);
 
         let foodsInRecipe = recipeData.map(item => item.name);
         let gramsPerIngredient = recipeData.map(item => item.gramsUsed);
@@ -575,7 +654,7 @@ const HomePage = () => {
         let totalGrams = 0;
 
         for (const food of recipeData) 
-            totalGrams += parseInt(food.grams, 10);
+            totalGrams += parseInt(food.gramsUsed, 10);
 
         let foodsInRecipe = recipeData.map(item => item.name);
         let gramsPerIngredient = recipeData.map(item => item.gramsUsed);
@@ -757,7 +836,7 @@ const HomePage = () => {
                 </div>
             </div>
             } {/* THE SCREEN WHERE USER INPUTS THE AMOUNT OF GRAMS THEY ATE OF THE FOOD THEY SELECTED */}
-            {enteringAmount===false && enteringAmountForRecipe===false?<div></div>:
+            {enteringAmount===false && enteringAmountForRecipe===false && editingAmount===false?<div></div>:
                 <div className="inputAmount">
                     <div>
                         <div className="foods_in_menu">
@@ -782,15 +861,22 @@ const HomePage = () => {
                         value={grams}
                         onChange={(e)=>setGrams(e.target.value)}/>
                     </div>
-                    {enteringAmount===false?
+                    {enteringAmountForRecipe===true?
                     <div className="horizontal_buttons">
                         <div className="button beside" onClick={()=>FoodSelectedForRecipe()}>Confirm</div>
                         <div className="button beside" onClick={()=>AmountToViewingRecipe()}>Back</div>
                     </div>:
+                    enteringAmount===true?
                     <div className="horizontal_buttons"> 
                         <div className="button beside" onClick={()=>FoodSelected()}>Confirm</div>
                         <div className="button beside" onClick={()=>AmountToViewing()}>Back</div>
-                    </div>}
+                    </div>:
+                        <div className="horizontal_buttons">
+                        <div className="button beside" onClick={()=>UpdateRecipeIngredients()}>Confirm</div>
+                        <div className="button beside delete">Delete</div>
+                        {/*<div className="button beside" onClick={()=>AmountToViewing()}>Back</div>*/}
+                    </div>
+                    }
                 </div>
             } {/* USER ADDING FOOD TO DATABASE*/}
             {addCustomFoods===false?<div></div>:
@@ -974,7 +1060,7 @@ const HomePage = () => {
                 <IngredientsHeader/>
                 <div className="scrollable">
                     {recipeData.map((foodItem, index) => (
-                    <div key={index} className="foods_in_menu body">
+                    <div key={index} onClick={()=>EditFoodInRecipes(index)} className="foods_in_menu body hoverable">
                         <div className="name">{foodItem.name}</div>
                         <div className="macro">{foodItem.gramsUsed}</div>
                         <div className="macro">{foodItem.calories}</div>
