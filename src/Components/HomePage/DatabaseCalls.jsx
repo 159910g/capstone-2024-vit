@@ -342,6 +342,7 @@ export function EditUserRecipe(oldRecipeName, recipeName, grams, foodnames, gram
 }
 
 export function CheckDate(day, month, year){
+    console.log(day+"/"+month+"/"+year);
     let user_id = sessionStorage.getItem('loggedInUser');
     const data = {user_id, day, month, year}
     return new Promise((resolve, reject) =>{
@@ -456,13 +457,12 @@ export function GetUserDetails(){
 
                 let name = responseText[0].name;
                 let email = responseText[0].email;
-                let password = responseText[0].password;
                 let height = responseText[1].height;
                 let weight = responseText[1].weight;
                 let age = responseText[1].age;
                 let gender = responseText[1].isMale;
 
-                resolve({name, email, password, height, weight, age, gender});
+                resolve({name, email, height, weight, age, gender});
             } else {
                 reject('Error: ' + xhr.status); // log any errors to the console
             }

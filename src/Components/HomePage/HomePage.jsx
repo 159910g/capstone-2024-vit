@@ -55,7 +55,8 @@ const HomePage = () => {
     const[foodDatabase, setFoodDatabase] = useState([]);
 
     const[editingRecipePipe, setEditingRecipePipe] = useState(false);
-    
+
+    const[historyData, setHistoryData] = useState();
     //arrays of food information for displaying the recipe
     const[recipeData, setRecipeData] = useState([{
         calories: 0,
@@ -389,6 +390,23 @@ const HomePage = () => {
         setEditingAmount(true);
     }
 
+    function DeleteRecipeIngredient()
+    {
+        console.log("delete recipe ingredient")
+        const updatedRecipeData = recipeData;
+        
+        updatedRecipeData.splice(globalIndex, 1);
+
+        setRecipeData(updatedRecipeData);
+
+        if(editingRecipePipe)
+            setEditRecipe(true);
+        else    
+            setAddRecipe(true);
+
+        setEditingAmount(false);
+    }
+
     function UpdateRecipeIngredients()
     {
         console.log("update recipe")
@@ -582,6 +600,25 @@ const HomePage = () => {
         }
     }
 
+    useEffect(() =>{
+        const date = monthHistory.map((_, index) => {
+            return (monthHistory[index]+"/"+dayHistory[index]+"/"+yearHistory[index])
+        });
+    
+        const data = {
+        date,
+        datasets: [
+            {
+            label: 'Calories History',
+            data: date.map((_, index) => parseInt(caloriesHistory[index],10)),
+            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            }
+            ]
+        };
+
+        setHistoryData(data);
+    }, [yearHistory]);
+
     function UpdateFoodLists(){
         GetFoodNames(true).then((foods) => {
             const combinedData = foods.tempFoodCaloriesList.map((calories, index) => ({
@@ -729,24 +766,16 @@ const HomePage = () => {
         nav('/ProfilePage');
     }
 
-    const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
-    const labels2 = [3, 0, 6, 3, 5, 3, 3];
-
-    const data = {
-    labels,
-    datasets: [
-        {
-        label: 'Dataset 1',
-        data: labels.map((label, index) => labels2[index]),
-        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-        },
-        {
-        label: 'Dataset 2',
-        data: labels.map(() => 2),
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
-        },
-    ],
-    };
+    //{
+        //label: 'Dataset 1',
+        //data: labels.map((label, index) => labels2[index]),
+        //backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        //},
+        //{
+        //label: 'Dataset 2',
+        //data: labels.map(() => 2),
+        //backgroundColor: 'rgba(53, 162, 235, 0.5)',
+        //},
 
     //<h1>This user id is logged in: {user_id}.</h1>
 
@@ -873,7 +902,7 @@ const HomePage = () => {
                     </div>:
                         <div className="horizontal_buttons">
                         <div className="button beside" onClick={()=>UpdateRecipeIngredients()}>Confirm</div>
-                        <div className="button beside delete">Delete</div>
+                        <div className="button beside delete" onClick={()=>DeleteRecipeIngredient()}>Delete</div>
                         {/*<div className="button beside" onClick={()=>AmountToViewing()}>Back</div>*/}
                     </div>
                     }
@@ -1024,7 +1053,7 @@ const HomePage = () => {
                         <div className="button beside" onClick={()=>SendEditFoodData()}>Carbs</div>
                         <div className="button beside" onClick={()=>EditFoodToMyFood(true)}>Fat</div>
                     </div>
-                    <Bar data={data} />;
+                    <Bar data={historyData} />
                     {/*<Bar data={[]}/>*/}
                     {/*<Chart data={caloriesHistory} />*/}
                 </div>

@@ -21,7 +21,6 @@ const ProfilePage = () =>{
         GetUserDetails().then((data) =>{
             setName(data.name);
             setEmail(data.email);
-            setPassword(data.password);
             setHeight(data.height);
             setWeight(data.weight);
             setAge(data.age);
