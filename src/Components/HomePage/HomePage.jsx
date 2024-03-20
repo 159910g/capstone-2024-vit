@@ -56,7 +56,16 @@ const HomePage = () => {
 
     const[editingRecipePipe, setEditingRecipePipe] = useState(false);
 
-    const[historyData, setHistoryData] = useState();
+    //const[historyData, setHistoryData] = useState();
+    const [historyData, setHistoryData] = useState();
+
+    const [trackables, setTrackables] = useState([{
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+    }]);
+    
     //arrays of food information for displaying the recipe
     const[recipeData, setRecipeData] = useState([{
         calories: 0,
@@ -146,6 +155,14 @@ const HomePage = () => {
             GetUserGoals().then((goals) => {
                 //womp2
                 setMacroGoals(goals);
+                const trackData = {
+                    calories: goals.trackCals,
+                    protein: goals.trackPro,
+                    carbs: goals.trackCar,
+                    fat: goals.trackFat
+                }
+
+                setTrackables(trackData);
             });
             GetUserTrackedFood().then((macros) => {
                 const renameData = {
@@ -154,7 +171,7 @@ const HomePage = () => {
                     carbs: macros.currentCarbs,
                     fat: macros.currentFat
                 }
-                console.log(renameData);
+                //console.log(renameData);
                 setCurrentTrackedMacros(renameData);
                 });
             });
@@ -171,8 +188,16 @@ const HomePage = () => {
         const {newRad, newCirc, newCircPercent} = updateCircle(svgCanvas, 0.85, currentTrackedMacros.calories, macroGoals.calorieGoal);//responseText[0].calorie_goal))
         
         //set all those values to "global" variables
-        SetRadius(newRad);
-        setCirc(newCirc);
+        if(trackables.calories == 2)
+        {
+            SetRadius(newRad);
+            setCirc(newCirc);
+        }
+        else
+        {
+            SetRadiusUnfocused(newRad);
+            setCircUnfocused(newCirc);
+        }
         setCircPercentage(newCircPercent);
     };
 
@@ -182,22 +207,50 @@ const HomePage = () => {
         const {newRad, newCirc, newCircPercent} = updateCircle(svgCanvas, 0.85, currentTrackedMacros.protein, macroGoals.proteinGoal)
 
         //set all those values to "global" variables
-        SetRadiusUnfocused(newRad);
-        setCircUnfocused(newCirc);
+        if(trackables.protein == 2)
+        {
+            SetRadius(newRad);
+            setCirc(newCirc);
+        }
+        else
+        {
+            SetRadiusUnfocused(newRad);
+            setCircUnfocused(newCirc);
+        }
         setCircPercentageProtein(newCircPercent);
     };
 
     const updateFatCircle = (svgCanvas) =>{
-        const {newCircPercent} = updateCircle(svgCanvas, 0.85, currentTrackedMacros.fat, macroGoals.fatGoal)
+        const {newRad, newCirc, newCircPercent} = updateCircle(svgCanvas, 0.85, currentTrackedMacros.fat, macroGoals.fatGoal)
 
         //set all those values to "global" variables
+        if(trackables.fat == 2)
+        {
+            SetRadius(newRad);
+            setCirc(newCirc);
+        }
+        else
+        {
+            SetRadiusUnfocused(newRad);
+            setCircUnfocused(newCirc);
+        }
         setCircPercentageFat(newCircPercent);
     };
 
     const updateCarbCircle = (svgCanvas) =>{
-        const {newCircPercent} = updateCircle(svgCanvas, 0.85, currentTrackedMacros.carbs, macroGoals.carbGoal)
+        const {newRad, newCirc, newCircPercent} = updateCircle(svgCanvas, 0.85, currentTrackedMacros.carbs, macroGoals.carbGoal)
 
         //set all those values to "global" variables
+        if(trackables.carbs == 2)
+        {
+            SetRadius(newRad);
+            setCirc(newCirc);
+        }
+        else
+        {
+            SetRadiusUnfocused(newRad);
+            setCircUnfocused(newCirc);
+        }
         setCircPercentageCarbs(newCircPercent);
     };
 
@@ -579,19 +632,19 @@ const HomePage = () => {
             GetUserHistory().then((history) =>{
                 console.log("DEBUG ",history.tempHistoryCalories);
 
-                setCaloriesHistory(history.tempHistoryCalories);
-                setProteinHistory(history.tempHistoryProtein);
-                setCarbsHistory(history.tempHistoryCarbs);
-                setFatHistory(history.tempHistoryFat);
-                setDayHistory(history.tempHistoryDay);
-                setMonthHistory(history.tempHistoryMonth);
-                setYearHistory(history.tempHistoryYear);
+                setCaloriesHistory(history.tempHistoryCalories.reverse());
+                setProteinHistory(history.tempHistoryProtein.reverse());
+                setCarbsHistory(history.tempHistoryCarbs.reverse());
+                setFatHistory(history.tempHistoryFat.reverse());
+                setDayHistory(history.tempHistoryDay.reverse());
+                setMonthHistory(history.tempHistoryMonth.reverse());
+                setYearHistory(history.tempHistoryYear.reverse());
             });
 
             console.log("DEBUG ",caloriesHistory);
 
-            setViewHistory(value);
-            setViewHome(!value);
+            //setViewHistory(value);
+            //setViewHome(!value);
         }
         else
         {
@@ -600,24 +653,118 @@ const HomePage = () => {
         }
     }
 
-    useEffect(() =>{
-        const date = monthHistory.map((_, index) => {
-            return (monthHistory[index]+"/"+dayHistory[index]+"/"+yearHistory[index])
-        });
-    
-        const data = {
-        date,
-        datasets: [
-            {
-            label: 'Calories History',
-            data: date.map((_, index) => parseInt(caloriesHistory[index],10)),
-            backgroundColor: 'rgba(255, 99, 132, 0.5)',
-            }
-            ]
-        };
+    function ViewCaloriesHistory()
+    {
+        if(yearHistory[0]!=null)
+        {
+            const date = monthHistory.map((_, index) => {
+                return (monthHistory[index]+"/"+dayHistory[index]+"/"+yearHistory[index])
+            });
 
-        setHistoryData(data);
+            //console.log(date);
+        
+            const data = {
+            labels: date,
+            datasets: [
+                {
+                label: 'Calories History',
+                data: caloriesHistory.map((_, index) => parseInt(caloriesHistory[index],10)),
+                backgroundColor: 'rgba(64, 179, 70, 1)',
+                }
+                ],
+            };
+            //console.log(data);
+            setHistoryData(data);
+        }
+    }
+
+    function ViewProteinHistory()
+    {
+        if(yearHistory[0]!=null)
+        {
+            const date = monthHistory.map((_, index) => {
+                return (monthHistory[index]+"/"+dayHistory[index]+"/"+yearHistory[index])
+            });
+
+            //console.log(date);
+        
+            const data = {
+            labels: date,
+            datasets: [
+                {
+                label: 'Protein History',
+                data: proteinHistory.map((_, index) => parseInt(proteinHistory[index],10)),
+                backgroundColor: 'rgba(64, 179, 70, 1)',
+                }
+                ]
+            };
+            //console.log(data);
+            setHistoryData(data);
+        }
+    }
+
+    function ViewCarbHistory()
+    {
+        if(yearHistory[0]!=null)
+        {
+            const date = monthHistory.map((_, index) => {
+                return (monthHistory[index]+"/"+dayHistory[index]+"/"+yearHistory[index])
+            });
+
+            //console.log(date);
+        
+            const data = {
+            labels: date,
+            datasets: [
+                {
+                label: 'Carbs History',
+                data: carbsHistory.map((_, index) => parseInt(carbsHistory[index],10)),
+                backgroundColor: 'rgba(64, 179, 70, 1)',
+                }
+                ]
+            };
+            //console.log(data);
+            setHistoryData(data);
+        }
+    }
+
+    function ViewFatHistory()
+    {
+        if(yearHistory[0]!=null)
+        {
+            const date = monthHistory.map((_, index) => {
+                return (monthHistory[index]+"/"+dayHistory[index]+"/"+yearHistory[index])
+            });
+
+            //console.log(date);
+        
+            const data = {
+            labels: date,
+            datasets: [
+                {
+                label: 'Fat History',
+                data: fatHistory.map((_, index) => parseInt(fatHistory[index],10)),
+                backgroundColor: 'rgba(64, 179, 70, 1)',
+                }
+                ]
+            };
+            //console.log(data);
+            setHistoryData(data);
+        }
+    }
+
+    useEffect(() =>{
+        ViewCaloriesHistory();
     }, [yearHistory]);
+
+    useEffect(() =>{
+        if (historyData!=null)
+        {
+            //console.log(historyData);
+            setViewHistory(true);
+            setViewHome(false);
+        }
+    }, [historyData]);
 
     function UpdateFoodLists(){
         GetFoodNames(true).then((foods) => {
@@ -663,7 +810,7 @@ const HomePage = () => {
 
 
     function AddCustomFoodToHome() {
-        console.log("upload");
+        //console.log("upload");
         UploadCustomFood(customUserData.name, customUserData.grams, customUserData.calories, customUserData.protein, customUserData.carbs, customUserData.fat).then(() => {
             UpdateFoodLists();
         });
@@ -696,7 +843,7 @@ const HomePage = () => {
         let foodsInRecipe = recipeData.map(item => item.name);
         let gramsPerIngredient = recipeData.map(item => item.gramsUsed);
 
-        console.log(selectedRecipeName +" -> "+ customUserData.name)
+        //console.log(selectedRecipeName +" -> "+ customUserData.name)
         EditUserRecipe(selectedRecipeName, customUserData.name, totalGrams, foodsInRecipe, gramsPerIngredient).then(() =>{
             UpdateFoodLists();
             setEditRecipe(false);
@@ -766,19 +913,6 @@ const HomePage = () => {
         nav('/ProfilePage');
     }
 
-    //{
-        //label: 'Dataset 1',
-        //data: labels.map((label, index) => labels2[index]),
-        //backgroundColor: 'rgba(255, 99, 132, 0.5)',
-        //},
-        //{
-        //label: 'Dataset 2',
-        //data: labels.map(() => 2),
-        //backgroundColor: 'rgba(53, 162, 235, 0.5)',
-        //},
-
-    //<h1>This user id is logged in: {user_id}.</h1>
-
     return (
         <div className='container_home'>
             <div className="background"></div>
@@ -792,20 +926,73 @@ const HomePage = () => {
                 {/* HOME SCREEN WHERE MACRO CIRCLES ARE DISPLAYED*/} 
             <div className='display_window'>
                 {viewHome===false?<div></div>:
-                <div className='focused_window'>
-                    <svg ref={calorieCanvas} className='focused_circle'>
-                    <MacroCircle ref={calorieCanvas}
+                    <div className='focused_window'>
+                    {trackables.calories===2?
+                        
+                        <svg ref={calorieCanvas} className='focused_circle'>
+                        <MacroCircle ref={calorieCanvas}
+                            radius={radius}
+                            circ={circ}
+                            circPercentage={circPercentage}
+                            currentTrackedMacros={currentTrackedMacros.calories}
+                            macroGoals={macroGoals.calorieGoal}
+                            color="blue"
+                        />
+                        </svg>:<div></div>}
+
+                    {trackables.protein===2?
+                        <svg ref={proteinCanvas} className='focused_circle'>
+                        <MacroCircle ref={proteinCanvas}
+                            radius={radius}
+                            circ={circ}
+                            circPercentage={circPercentageProtein}
+                            currentTrackedMacros={currentTrackedMacros.protein}
+                            macroGoals={macroGoals.proteinGoal}
+                            color="green"
+                        />
+                        <div>Protein</div>
+                        </svg>:<div></div>}
+
+                    {trackables.carbs===2?
+                    <svg ref={carbCanvas} className='focused_circle'>
+                    <MacroCircle ref={carbCanvas}
                         radius={radius}
                         circ={circ}
-                        circPercentage={circPercentage}
-                        currentTrackedMacros={currentTrackedMacros.calories}
-                        macroGoals={macroGoals.calorieGoal}
+                        circPercentage={circPercentageCarbs}
+                        currentTrackedMacros={currentTrackedMacros.carbs}
+                        macroGoals={macroGoals.carbGoal}
+                        color="red"
                     />
-                    </svg>
-                </div> 
+                    </svg>:<div></div>}
+
+                    {trackables.fat===2?
+                    <svg ref={fatCanvas} className='focused_circle'>
+                    <MacroCircle ref={fatCanvas}
+                        radius={radius}
+                        circ={circ}
+                        circPercentage={circPercentageFat}
+                        currentTrackedMacros={currentTrackedMacros.fat}
+                        macroGoals={macroGoals.fatGoal}
+                        color="yellow"
+                    />
+                    </svg>:<div></div>}
+                    </div> 
                 }
                 {viewHome===false?<div></div>: 
                 <div className='unfocused_window'>
+                    {trackables.calories===1?
+                    <svg ref={calorieCanvas} className='unfocused_square'>
+                        <MicroCircle
+                            radius={radiusUnfocused}
+                            circ={circUnfocused}
+                            circPercentage={circPercentage}
+                            currentTrackedMacros={currentTrackedMacros.calories}
+                            macroGoals={macroGoals.calorieGoal}
+                            color="blue"
+                        />
+                    </svg>:<div></div>}
+
+                    {trackables.protein===1?
                     <svg ref={proteinCanvas} className='unfocused_square'>
                         <MicroCircle
                             radius={radiusUnfocused}
@@ -815,7 +1002,9 @@ const HomePage = () => {
                             macroGoals={macroGoals.proteinGoal}
                             color="green"
                         />
-                    </svg>
+                    </svg>:<div></div>}
+
+                    {trackables.carbs===1?
                     <svg ref={carbCanvas} className='unfocused_square'>
                         <MicroCircle
                             radius={radiusUnfocused}
@@ -825,7 +1014,9 @@ const HomePage = () => {
                             macroGoals={macroGoals.carbGoal}
                             color="red"
                         />
-                    </svg>
+                    </svg>:<div></div>}
+
+                    {trackables.fat===1?
                     <svg ref={fatCanvas} className='unfocused_square'>
                         <MicroCircle
                             radius={radiusUnfocused}
@@ -833,9 +1024,10 @@ const HomePage = () => {
                             circPercentage={circPercentageFat}
                             currentTrackedMacros={currentTrackedMacros.fat}
                             macroGoals={macroGoals.fatGoal}
-                            color="blue"
+                            color="yellow"
                         />
-                    </svg> 
+                    </svg>:<div></div>
+                    }
                 </div>}
             </div> {/* SHOW LIST OF ALL FOODS USER HAS ACCESS TO IN DATABASE FOR EITHER ADDING FOOD TO TRACKER OR ADDING TO RECIPE*/}
             {viewFoods===false && addFoodtoRecipe===false?<div></div>: //hidden when viewFoods is false
@@ -1048,10 +1240,11 @@ const HomePage = () => {
                 <div>
                     <div className="button" onClick={()=>HomeToHistory(false)}>Back</div>
                     <div className="horizontal_buttons">
-                        <div className="button beside" onClick={()=>SendEditFoodData()}>Calories</div>
-                        <div className="button beside" onClick={()=>EditFoodToMyFood(true)}>Protein</div>
-                        <div className="button beside" onClick={()=>SendEditFoodData()}>Carbs</div>
-                        <div className="button beside" onClick={()=>EditFoodToMyFood(true)}>Fat</div>
+                        <div className="button beside" onClick={()=>ViewCaloriesHistory()}>Calories</div>
+                        <div className="button beside" onClick={()=>ViewProteinHistory()}>Protein</div>
+                        <div className="button beside" onClick={()=>ViewCarbHistory()}>Carbs</div>
+                        <div className="button beside" onClick={()=>ViewFatHistory()}>Fat</div>
+                    
                     </div>
                     <Bar data={historyData} />
                     {/*<Bar data={[]}/>*/}

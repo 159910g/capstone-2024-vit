@@ -9,6 +9,10 @@ export function GetUserGoals () {
     let proteinGoal = 2;
     let carbGoal = 2;
     let fatGoal = 2;
+    let trackCals = 0;
+    let trackPro = 0;
+    let trackCar = 0;
+    let trackFat = 0;
 
     return new Promise((resolve, reject) =>{
         var xhr = new XMLHttpRequest();
@@ -24,8 +28,12 @@ export function GetUserGoals () {
                 proteinGoal = responseText[0].protein_goal;
                 carbGoal = responseText[0].carb_goal;
                 fatGoal = responseText[0].fat_goal;
+                trackCals = responseText[0].track_calories;
+                trackPro = responseText[0].track_protein;
+                trackCar = responseText[0].track_carbs;
+                trackFat = responseText[0].track_fat;
 
-                resolve({calorieGoal, proteinGoal, carbGoal, fatGoal});
+                resolve({calorieGoal, proteinGoal, carbGoal, fatGoal, trackCals, trackPro, trackCar, trackFat});
             } else {
                 reject('Error: ' + xhr.status); // log any errors to the console
             }
@@ -413,6 +421,7 @@ export function GetUserHistory(){
         xhr.send('sentData=' + encodeURIComponent(JSON.stringify(user_id)));
         xhr.addEventListener('load', function() {
             if (xhr.status === 200) {
+                console.log(xhr.responseText);
                 let responseText = JSON.parse(xhr.responseText);
 
                 const tempHistoryCalories = [];
@@ -461,8 +470,13 @@ export function GetUserDetails(){
                 let weight = responseText[1].weight;
                 let age = responseText[1].age;
                 let gender = responseText[1].isMale;
+                let activityLevel = responseText[1].activityLevel;
+                let trackCals = responseText[1].track_calories;
+                let trackPro = responseText[1].track_protein;
+                let trackCar = responseText[1].track_carbs;
+                let trackFat = responseText[1].track_fat;
 
-                resolve({name, email, height, weight, age, gender});
+                resolve({name, email, height, weight, age, gender, activityLevel, trackCals, trackPro, trackCar, trackFat});
             } else {
                 reject('Error: ' + xhr.status); // log any errors to the console
             }
@@ -470,9 +484,9 @@ export function GetUserDetails(){
     });
 }
 
-export function EditUserDetails(weight, height, age, name, email, password, gender){
+export function EditUserDetails(weight, height, age, name, email, password, gender, activityLevel, trackCals, trackPro, trackCar, trackFat){
     let user_id = sessionStorage.getItem('loggedInUser');
-    const data = {user_id, weight, height, age, name, email, password, gender}
+    const data = {user_id, weight, height, age, name, email, password, gender, activityLevel, trackCals, trackPro, trackCar, trackFat}
     return new Promise((resolve, reject) =>{
         var xhr = new XMLHttpRequest();
         xhr.open('POST', 'https://capstone2024.com/profilePage.php?action=EditUserDetails');

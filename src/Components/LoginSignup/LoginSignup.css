@@ -8,6 +8,16 @@
         background: #fff;
         padding-bottom: 5%;
     }
+
+    .input{
+        display: flex;
+        align-items: center;
+        margin: auto;
+        width: 90%;
+        height: 80px;
+        background: #eaeaea;
+        border-radius: 6px;
+    }
 }
 
 @media only screen and (min-width: 767px){
@@ -19,6 +29,16 @@
         width: 35%;
         background: #fff;
         padding-bottom: 30px;
+    }
+
+    .input{
+        display: flex;
+        align-items: center;
+        margin: auto;
+        width: 70%;
+        height: 80px;
+        background: #eaeaea;
+        border-radius: 6px;
     }
 }
 
@@ -83,16 +103,6 @@
     display: flex;
     flex-direction: column;
     gap: 25px;
-}
-
-.input{
-    display: flex;
-    align-items: center;
-    margin: auto;
-    width: 70%;
-    height: 80px;
-    background: #eaeaea;
-    border-radius: 6px;
 }
 
 .input img{

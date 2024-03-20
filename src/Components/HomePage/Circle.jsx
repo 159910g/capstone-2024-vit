@@ -22,7 +22,7 @@ export function updateCircle (svgCanvas, radius, current, total) {
     return { newRad, newCirc, newCircPercent}
 }
 
-export const MacroCircle = ({ radius, circ, circPercentage, currentTrackedMacros, macroGoals }) => {
+export const MacroCircle = ({ radius, circ, circPercentage, currentTrackedMacros, macroGoals, color }) => {
     return (
         <svg className='focused_circle'>
             <circle 
@@ -39,7 +39,7 @@ export const MacroCircle = ({ radius, circ, circPercentage, currentTrackedMacros
                 cx="50%" 
                 cy="50%"
                 fill="transparent"
-                stroke="blue"
+                stroke={color} 
                 strokeWidth="2rem"
                 strokeDasharray={circ}
                 strokeDashoffset={circ - circPercentage}
