@@ -35,7 +35,12 @@ const HomePage = () => {
     const[macroGoals, setMacroGoals] = useState(1);
 
     //current macro data for  user
-    const[currentTrackedMacros, setCurrentTrackedMacros] = useState(0);
+    const[currentTrackedMacros, setCurrentTrackedMacros] = useState([{
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+    }]);
 
     //states for menu selection
     const[viewFoods, setViewFoods] = useState(false);
@@ -879,7 +884,7 @@ const HomePage = () => {
     }
 
     function DeleteRecipe(){
-        DeleteUserRecipe(selectedFoodName).then(() =>{
+        DeleteUserRecipe(selectedRecipeName).then(() =>{
             UpdateFoodLists();
             setMyFoods(true);
             setEditRecipe(false);
@@ -913,6 +918,12 @@ const HomePage = () => {
         nav('/ProfilePage');
     }
 
+    function ToLogin()
+    {
+        nav('/');
+        sessionStorage.setItem('loggedInUser', -1)
+    }
+
     return (
         <div className='container_home'>
             <div className="background"></div>
@@ -921,6 +932,7 @@ const HomePage = () => {
                     <div className="button" onClick={()=>{HomeToViewFood(true);}}>Add Food</div>
                     <div className="button" onClick={()=>{ToProfile();}}>Profile</div>
                     <div className="button" onClick={()=>{HomeToHistory(true);}}>History</div>
+                    <div className="button" onClick={()=>{ToLogin();}}>Log Out</div>
                 </div>
                 :<div></div>}
                 {/* HOME SCREEN WHERE MACRO CIRCLES ARE DISPLAYED*/} 

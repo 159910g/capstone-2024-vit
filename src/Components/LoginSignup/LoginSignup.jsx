@@ -29,7 +29,7 @@ const LoginSignup = () => {
             (()=>{setAction("Sign Up"); })();
         } 
         else {
-            console.log("Sign Up Complete");
+            //console.log("Sign Up Complete");
             e.preventDefault();
             const user = {email, password, name};
             const userDetails = {height, weight, age, activityLevel, gender};
@@ -44,11 +44,11 @@ const LoginSignup = () => {
             xhr.addEventListener('load', function() {
                 if (xhr.status === 200) {
                     // Handle the response from the server
-                    console.log(xhr.responseText);
+                    //console.log(xhr.responseText);
                     var responseText = JSON.parse(xhr.responseText);
                     sessionStorage.setItem('loggedInUser', responseText[0].user_id)
 
-                    console.log(sessionStorage.getItem('loggedInUser')); // log the response to the console
+                    //console.log(sessionStorage.getItem('loggedInUser')); // log the response to the console
                 
                     if(sessionStorage.getItem('loggedInUser') != null)
                     {
@@ -56,7 +56,7 @@ const LoginSignup = () => {
                         nav('/HomePage');
                     }
                 } else {
-                    console.log('Error: ' + xhr.status); // log any errors to the console
+                    //console.log('Error: ' + xhr.status); // log any errors to the console
                 }
             });
         }
@@ -70,7 +70,7 @@ const LoginSignup = () => {
             (()=>{setAction("Login"); })();
         } 
         else {
-            console.log("Login Complete"); 
+            //console.log("Login Complete"); 
             e.preventDefault();
             const user = {email, password, name};
 
@@ -94,7 +94,7 @@ const LoginSignup = () => {
                         nav('/HomePage');
                     }
                 } else {
-                    console.log('Error: ' + xhr.status); // log any errors to the console
+                    //console.log('Error: ' + xhr.status); // log any errors to the console
                 }
             });
             //send data to DB

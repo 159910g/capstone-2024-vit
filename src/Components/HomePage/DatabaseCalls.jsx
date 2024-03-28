@@ -85,14 +85,14 @@ export function GetUserTrackedFood () {
                     }
                     else
                     {
-                        console.log("in the else");
+                        //console.log("in the else");
                         //take that number and multiply it by the following values here, then add them to the circle
                         currentCalories += Math.floor(parseInt(row[0].calories, 10) * amountEaten);
                         currentProtein += Math.floor(parseInt(row[0].protein, 10) * amountEaten);
                         currentCarbs += Math.floor(parseInt(row[0].carbs, 10) * amountEaten);
                         currentFat += Math.floor(parseInt(row[0].fat, 10) * amountEaten);
-                        console.log("current row= "+amountEaten);
-                        console.log("current calories= "+currentCalories);
+                        //console.log("current row= "+amountEaten);
+                        //console.log("current calories= "+currentCalories);
                     }
                 });
                 resolve({currentCalories, currentProtein, currentCarbs,  currentFat});
@@ -223,7 +223,7 @@ export function GetUserGenRecipes () {
 
 export function GetUserRecipeIngredients(recipeName) {
     let user_id = sessionStorage.getItem('loggedInUser');
-    console.log(recipeName);
+    //console.log(recipeName);
     const data = {user_id, recipeName};
 
     return new Promise((resolve, reject) =>{
@@ -234,7 +234,7 @@ export function GetUserRecipeIngredients(recipeName) {
         xhr.send('sentData=' + encodeURIComponent(JSON.stringify(data)));
         xhr.addEventListener('load', function() {
             if (xhr.status === 200) {
-                console.log(xhr.responseText);
+                //console.log(xhr.responseText);
                 let responseText = JSON.parse(xhr.responseText);
 
                 const tempFoodNamesList = [];
@@ -288,7 +288,7 @@ export function AddToTrackedFood (foodName, grams) {
 
 //takes food data and sends it do database
 export function UploadCustomFood(name, grams, calories, protein, carbs, fat){
-    console.log("upload");
+    //console.log("upload");
     let user_id = sessionStorage.getItem('loggedInUser');
     const data = {user_id, name, grams, calories, protein, carbs, fat}
     return new Promise((resolve, reject) =>{
@@ -299,7 +299,7 @@ export function UploadCustomFood(name, grams, calories, protein, carbs, fat){
         xhr.send('sentData=' + encodeURIComponent(JSON.stringify(data)));
         xhr.addEventListener('load', function() {
             if (xhr.status === 200) {
-                console.log(xhr.responseText);
+                //console.log(xhr.responseText);
                 resolve();
             } else {
                 reject('Error: ' + xhr.status); // log any errors to the console
@@ -340,7 +340,7 @@ export function EditUserRecipe(oldRecipeName, recipeName, grams, foodnames, gram
         xhr.send('sentData=' + encodeURIComponent(JSON.stringify(data)));
         xhr.addEventListener('load', function() {
             if (xhr.status === 200) {
-                console.log(xhr.responseText);
+                //console.log(xhr.responseText);
                 resolve();
             } else {
                 reject('Error: ' + xhr.status); // log any errors to the console
@@ -350,7 +350,7 @@ export function EditUserRecipe(oldRecipeName, recipeName, grams, foodnames, gram
 }
 
 export function CheckDate(day, month, year){
-    console.log(day+"/"+month+"/"+year);
+    //console.log(day+"/"+month+"/"+year);
     let user_id = sessionStorage.getItem('loggedInUser');
     const data = {user_id, day, month, year}
     return new Promise((resolve, reject) =>{
@@ -361,7 +361,7 @@ export function CheckDate(day, month, year){
         xhr.send('sentData=' + encodeURIComponent(JSON.stringify(data)));
         xhr.addEventListener('load', function() {
             if (xhr.status === 200) {
-                console.log(xhr.responseText);
+                //console.log(xhr.responseText);
                 resolve();
             } else {
                 reject('Error: ' + xhr.status); // log any errors to the console
@@ -381,7 +381,7 @@ export function DeleteCustomFood(foodName){
         xhr.send('sentData=' + encodeURIComponent(JSON.stringify(data)));
         xhr.addEventListener('load', function() {
             if (xhr.status === 200) {
-                console.log(xhr.responseText);
+                //console.log(xhr.responseText);
                 resolve();
             } else {
                 reject('Error: ' + xhr.status); // log any errors to the console
@@ -391,7 +391,7 @@ export function DeleteCustomFood(foodName){
 }
 
 export function DeleteUserRecipe(recipeName){
-    console.log("delete recipe");
+    //console.log("delete recipe");
     let user_id = sessionStorage.getItem('loggedInUser');
     const data = {user_id, recipeName}
     return new Promise((resolve, reject) =>{
@@ -402,7 +402,7 @@ export function DeleteUserRecipe(recipeName){
         xhr.send('sentData=' + encodeURIComponent(JSON.stringify(data)));
         xhr.addEventListener('load', function() {
             if (xhr.status === 200) {
-                console.log(xhr.responseText);
+                //console.log(xhr.responseText);
                 resolve();
             } else {
                 reject('Error: ' + xhr.status); // log any errors to the console
@@ -421,7 +421,7 @@ export function GetUserHistory(){
         xhr.send('sentData=' + encodeURIComponent(JSON.stringify(user_id)));
         xhr.addEventListener('load', function() {
             if (xhr.status === 200) {
-                console.log(xhr.responseText);
+                //console.log(xhr.responseText);
                 let responseText = JSON.parse(xhr.responseText);
 
                 const tempHistoryCalories = [];
@@ -460,9 +460,9 @@ export function GetUserDetails(){
         xhr.send('sentData=' + encodeURIComponent(JSON.stringify(user_id)));
         xhr.addEventListener('load', function() {
             if (xhr.status === 200) {
-                console.log(xhr.responseText);
+                //console.log(xhr.responseText);
                 let responseText = JSON.parse(xhr.responseText);
-                console.log(responseText);
+                //console.log(responseText);
 
                 let name = responseText[0].name;
                 let email = responseText[0].email;
@@ -495,7 +495,7 @@ export function EditUserDetails(weight, height, age, name, email, password, gend
         xhr.send('sentData=' + encodeURIComponent(JSON.stringify(data)));
         xhr.addEventListener('load', function() {
             if (xhr.status === 200) {
-                console.log(xhr.responseText);
+                //console.log(xhr.responseText);
                 resolve({});
             } else {
                 reject('Error: ' + xhr.status); // log any errors to the console
@@ -515,7 +515,7 @@ export function AddRecipe(recipeName, grams, foodnames, gramsPerIngredient){
         xhr.send('sentData=' + encodeURIComponent(JSON.stringify(data)));
         xhr.addEventListener('load', function() {
             if (xhr.status === 200) {
-                console.log(xhr.responseText);
+                //console.log(xhr.responseText);
                 resolve({});
             } else {
                 reject('Error: ' + xhr.status); // log any errors to the console

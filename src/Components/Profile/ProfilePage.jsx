@@ -184,7 +184,7 @@ const ProfilePage = () =>{
                     {trackPro===2?<div></div>:
                         <div className="horizontal_container">
                             <div className={trackPro===1?"text":"text gray"} onClick={()=>{setTrackPro(1)}}>Display Protein</div>
-                            <div className={trackPro===0?"text":"text gray"} onClick={()=>{setTrackPro(0)}}>Don't Display Protein</div>
+                            <div className={trackPro===0?"text":"text gray"} onClick={()=>{setTrackPro(0)}}>Hide Protein</div>
                         </div>}
                     </div>
                 </div>
@@ -194,7 +194,7 @@ const ProfilePage = () =>{
                     {trackCar===2?<div></div>:
                     <div className="horizontal_container">
                         <div className={trackCar===1?"text":"text gray"} onClick={()=>{setTrackCar(1)}}>Display Carbs</div>
-                        <div className={trackCar===0?"text":"text gray"} onClick={()=>{setTrackCar(0)}}>Don't Display Carbs</div>
+                        <div className={trackCar===0?"text":"text gray"} onClick={()=>{setTrackCar(0)}}>Hide Carbs</div>
                         </div>}
                     </div>
                 </div>
@@ -204,7 +204,7 @@ const ProfilePage = () =>{
                     {trackFat===2?<div></div>:
                     <div className="horizontal_container">
                         <div className={trackFat===1?"text":"text gray"} onClick={()=>{setTrackFat(1)}}>Display Fat</div>
-                        <div className={trackFat===0?"text":"text gray"} onClick={()=>{setTrackFat(0)}}>Don't Display Fat</div>
+                        <div className={trackFat===0?"text":"text gray"} onClick={()=>{setTrackFat(0)}}>Hide Fat</div>
                         </div>}
                     </div>
                 </div>
